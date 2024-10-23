@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INVENTO</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
+</head>
+<body>
+
+
+
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: url(static/achat.png) no-repeat;
+            backdrop-filter: blur(5px);
+            background-size: cover;
+            background-position: center;
+        }
+        .table {
+            background: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #000000;
+            
+        }
+        h2 {
+            font-size: 36px;
+            text-align: center;
+            color: rgba(145, 42, 85, 0.753);
+        }
+    </style>
+
+    <div class="container mt-5" style="background-color: #ebd4d4;border-radius: 25px;">
+        
+        <form id="search-form" action="#" style="margin-top: 25px;">
+            <div class="form-input" style="border: #ccd2ee;">
+                <input type="search" id="search-query"style="border: #ccd2ee; border-radius: 25px" placeholder="Search..." >
+                <button type="submit" class="search-btn" style="border: #ccd2ee;border-radius: 25px;"><i class='bx bx-search'></i></button>
+                </div>
+        </form>
+        <h2>Demandes d'Achats en Cours</h2>
+        <table class="table table-striped" style="background-color: #ccd2ee;text-align:center;">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Quantité</th>
+                    <th>User</th>
+                    <th>Emplacement</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes_achats %}
+                <tr>
+                    <td>{{ demande.libelle_article }}</td>
+                    <td>{{ demande.quantite }}</td>
+                    <td>{{ demande.demandeur }}</td>
+                    <td>{{ demande.emplacement }}</td>
+                    <td>{{ demande.date }}</td>
+                    <td>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAchat{{ demande.id }}">Approuver</button>
+                        <div class="modal fade" id="modalAchat{{ demande.id }}" tabindex="-1" aria-labelledby="modalAchatLabel{{ demande.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalAchatLabel{{ demande.id }}">Approuver la Demande d'Achat</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('service_achat_vente') }}">
+                                        <div class="modal-body">
+                                            <input type="hidden" name="demande_id" value="{{ demande.id }}">
+                                            <input type="hidden" name="type_demande" value="achat">
+                                            <div class="form-group">
+                                                <label for="fournisseur">Fournisseur</label>
+                                                <input type="text" class="form-control" name="fournisseur" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="prix_achat">Prix d'Achat</label>
+                                                <input type="number" step="0.1" class="form-control" name="prix_achat" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Approuver</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Demandes de Ventes en Cours</h2>
+        <table class="table table-striped" style="background-color: #eedabb;text-align:center;">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Quantité</th>
+                    <th>Demandeur</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes_ventes %}
+                <tr>
+                    <td>{{ demande.libelle_article }}</td>
+                    <td>{{ demande.quantite }}</td>
+                    <td>{{ demande.demandeur }}</td>
+                    <td>{{ demande.date.strftime('%Y-%m-%d %H:%M:%S') if demande.date else 'En attente' }}</td>
+                    <td>
+                        <!-- Bouton Approuver la demande -->
+                        <form method="POST" action="{{ url_for('service_achat_vente') }}">
+                            <input type="hidden" name="demande_id" value="{{ demande.code_demande }}">
+                            <input type="hidden" name="type_demande" value="vente">
+                        
+                            <!-- Button Approuver -->
+                            <button type="submit" name="action" value="approuver" class="btn btn-success">
+                                Approuver la demande
+                            </button>
+                        
+                            <!-- Button Annuler -->
+                            <button type="submit" name="action" value="annuler" class="btn btn-danger">
+                                Annuler la demande
+                            </button>
+                        </form>
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <li style="margin-bottom: 25px; position: relative;color: rgb(255, 0, 0);border-radius: 25px;">
+            <a href="/logout" class="logout" style="position: relative;color: rgb(255, 0, 0);border-radius: 25px;">
+                <i class='bx bxs-log-out-circle' style="position: relative;color: rgb(255, 0, 0);border-radius: 25px;"></i>
+                <button class="text" style="position: relative;color: rgb(255, 0, 0);border-radius: 25px;">Logout</button>
+            </a>
+        </li>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+
+    
+
+<!-- Modal Styles -->
+<style>
+    .search-filter {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    #filterModal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+        overflow: auto;
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    .form-input {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+    .form-input input[type="search"] {
+        padding: 5px;
+    }
+
+    .filter-btn {
+        margin-top: 10px;
+    }
+</style>
+
+<!-- JavaScript/jQuery -->
+
+
+
+
+
+
+<!-- Modal Styles -->
+
+<!-- JavaScript for Modal Behavior -->
+
+
+</body>
+</html>

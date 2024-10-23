@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INVENTO</title>
+</head>
+<body>
+
+<h1>Ajouter Demande de Vente</h1>
+
+<form id="demandeForm">
+    <div>
+        <label for="code_article">Code Article:</label>
+        <input type="text" id="code_article" required>
+    </div>
+    <div>
+        <label for="libelle_article">Libellé Article:</label>
+        <input type="text" id="libelle_article" required>
+    </div>
+    <div>
+        <label for="quantite">Quantité:</label>
+        <input type="number" id="quantite" required>
+    </div>
+    <div>
+        <label for="commande">Commande:</label>
+        <input type="text" id="commande" required>
+    </div>
+    <div>
+        <label for="vers">Vers:</label>
+        <input type="text" id="vers" required>
+    </div>
+    
+    <!-- Champs cachés pour demandeur et emplacement -->
+    <input type="hidden" id="demandeur" value="{{ session.username }}">
+    <input type="hidden" id="emplacement" value="{{ session.emplacement }}">
+
+    <button type="submit">Valider</button>
+</form>
+
+<script>
+    document.getElementById('demandeForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = {
+            code_article: document.getElementById('code_article').value,
+            libelle_article: document.getElementById('libelle_article').value,
+            quantite: parseInt(document.getElementById('quantite').value, 10),
+            commande: document.getElementById('commande').value,
+            vers: document.getElementById('vers').value,
+            demandeur: document.getElementById('demandeur').value,
+            emplacement: document.getElementById('emplacement').value,
+            etat: 1,  // État fixé à 1
+            reception: 0  // Réception fixé à 0
+        };
+
+        fetch('/add_inventaire', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue : ' + error.message);
+        });
+    });
+</script>
+
+</body>
+</html>

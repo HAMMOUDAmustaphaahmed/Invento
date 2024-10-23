@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- Favicon -->
+     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+     <link rel="stylesheet" href="{{ url_for('static', filename='analytics.css') }}">
+
+    <title>INVENTO</title>
+    <!-- ApexCharts CDN -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <h2>Total des Articles Disponibles</h2>
+            <p id="total-articles">0</p>
+        </div>
+        <div class="kpi-card">
+            <h2>Total des Articles</h2>
+            <p id="total-articles-count">0</p>
+        </div>
+        <div class="kpi-card">
+            <h2>Total des Ventes</h2>
+            <p id="total-ventes">0</p>
+        </div>
+        <div class="kpi-card">
+            <h2>Total des Achats</h2>
+            <p id="total-achats">0</p>
+        </div>
+        <div class="kpi-card">
+            <h2>Valeur Totale des Stocks</h2>
+            <p id="valeur-stock">0 €</p>
+        </div>
+        <div class="kpi-card">
+            <h2>Commandes Approuvées Non Complétées</h2>
+            <p id="commandes-non-completes">0</p>
+        </div>
+    </div>
+
+    <canvas id="chart-articles"></canvas>
+
+    <canvas id="chart-total-ventes-achats"></canvas>
+
+    <script src="{{ url_for('static', filename='analytics.js') }}"></script>
+</body>
+</html>

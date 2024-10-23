@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des actions</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Historique des actions</h1>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Code Demande</th>
+                <th>Code Article</th>
+                <th>Libellé Article</th>
+                <th>Quantité</th>
+                <th>Prix</th>
+                <th>Fournisseur</th>
+                <th>Emplacement</th>
+                <th>Action</th>
+                <th>Utilisateur</th>
+                <th>Détails</th>
+                <th>Usine</th>
+                <th>Date Action</th>
+                <th>Date Approbation Demande</th>
+                <th>Date Réception</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in history %}
+            <tr>
+                <td>{{ h.id_history }}</td>
+                <td>{{ h.code_demande }}</td>
+                <td>{{ h.code_article }}</td>
+                <td>{{ h.libelle_article }}</td>
+                <td>{{ h.quantite }}</td>
+                <td>{{ h.prix }}</td>
+                <td>{{ h.fournisseur }}</td>
+                <td>{{ h.emplacement }}</td>
+                <td>{{ h.action }}</td>
+                <td>{{ h.user }}</td>
+                <td>{{ h.details }}</td>
+                <td>{{ h.usine }}</td>
+                <td>{{ h.date_action }}</td>
+                <td>{{ h.date_approuver_demande }}</td>
+                <td>{{ h.date_reception }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

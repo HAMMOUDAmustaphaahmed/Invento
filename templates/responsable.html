@@ -1,0 +1,3345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!-- Favicon -->
+ <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+	<title>INVENTO</title>
+</head>
+<body>
+
+
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="#" class="brand">
+			<nav>
+                
+                    <img src="{{ url_for('static', filename='invengo.png') }}" alt="Invengo Logo" style="width: 150px;">
+                
+            </nav>
+            <style>
+                nav img {
+                max-width: 150px;  /* Ajustez selon vos besoins */
+                max-height: 150px;
+                margin-top: 20px;
+                margin-bottom: -50px;
+                margin-left: 10px;
+                margin-right: 10px;}
+            </style>
+		</a>
+		<ul class="side-menu top">
+			<!-- Trigger Button -->
+<!-- Trigger pour le modal -->
+ <!-- Liste principale Articles -->
+<!-- Liste principale Articles -->
+
+
+    <!-- Sous-liste masquée par défaut -->
+  
+        <li id="add-article-li">
+            <a href="#">
+                <i class='bx bxs-plus-circle'></i>
+                <span class="text">Ajouter Article</span>
+            </a>
+        </li>
+        <li id="edit-article-li">
+            <a href="#" id="open-edit-article-modal">
+                <i class='bx bxs-edit'></i>
+                <span class="text">Éditer Article</span>
+            </a>
+        </li>
+        
+
+
+<style>/* Style pour masquer la sous-liste par défaut */
+    #articles-options {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: none; /* Masquer par défaut */
+    }
+    
+    #articles-options li {
+        margin-left: 20px; /* Décaler un peu les sous-options */
+    }
+    
+    #articles-options a {
+        display: block;
+        padding: 5px;
+        text-decoration: none;
+        color: #000; /* Ajustez selon votre thème */
+    }
+    
+    #articles-options a:hover {
+        background-color: #f0f0f0; /* Effet hover pour les liens */
+        cursor: pointer;
+    }
+    
+    /* Assurez-vous que le reste des éléments <li> ne sont pas couverts */
+    #articles-li {
+        position: relative;
+    }
+    
+</style>
+
+<script>
+// Bascule l'affichage des options quand on clique sur "Articles"
+$('#toggle-articles').on('click', function(event) {
+    event.preventDefault();  // Empêche le comportement par défaut du lien
+    $('#articles-options').toggle();  // Affiche ou masque les options
+});
+
+</script>
+
+
+
+
+<!-- Modal pour éditer les articles -->
+<div id="editArticleModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Éditer Article</h2>
+        <div class="form-group">
+            <label for="search-article">Rechercher Article (Code Article):</label>
+            <input type="text" id="search-article" placeholder="Entrer code d'article">
+            <button id="search-article-button">Rechercher</button>
+        </div>
+        <form id="edit-article-form">
+            <!-- Champ caché pour stocker l'ID de l'article -->
+            <input type="hidden" id="edit-id-article" name="id_article" required>
+
+            <div class="form-group">
+                <label for="edit-code-article">Code Article:</label>
+                <input type="text" id="edit-code-article" name="code_article" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-libelle-article">Libellé Article:</label>
+                <input type="text" id="edit-libelle-article" name="libelle_article" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-quantite">Quantité:</label>
+                <input type="number" id="edit-quantite" name="quantite" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-prix-achat">Prix Achat:</label>
+                <input type="number" id="edit-prix-achat" name="prix_achat" required>
+            </div>
+            <button type="submit" class="submit-button">Mettre à jour</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Ouvrir le modal quand on clique sur le lien "Éditer Article"
+    $('#open-edit-article-modal').on('click', function(event) {
+        event.preventDefault();
+        $('#editArticleModal').show();  // Afficher le modal
+    });
+
+    // Fermer le modal quand on clique sur le bouton "close"
+    $('.close-button').on('click', function() {
+        $('#editArticleModal').hide();  // Cacher le modal
+    });
+
+    // Fermer le modal quand on clique en dehors de la zone du modal
+    $(window).on('click', function(event) {
+        if (event.target.id === 'editArticleModal') {
+            $('#editArticleModal').hide();
+        }
+    });
+
+    // Rechercher l'article lorsqu'on entre un code d'article et qu'on clique sur "Rechercher"
+    $('#search-article-button').on('click', function() {
+        var code_article = $('#search-article').val();
+        $.ajax({
+            url: '/get_article_info',
+            type: 'GET',
+            data: { code_article: code_article },
+            success: function(response) {
+                if (response.error) {
+                    alert(response.error);
+                } else {
+                    // Pré-remplir les champs avec les informations de l'article
+                    $('#edit-id-article').val(response.id_article); // Assigner l'ID caché
+                    $('#edit-code-article').val(response.code_article);
+                    $('#edit-libelle-article').val(response.libelle_article);
+                    $('#edit-quantite').val(response.quantite);
+                    $('#edit-prix-achat').val(response.prix_achat);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Erreur lors de la recherche de l\'article');
+            }
+        });
+    });
+
+    // Soumettre le formulaire pour mettre à jour l'article
+    $('#edit-article-form').on('submit', function(event) {
+        event.preventDefault();
+
+        var articleData = {
+            id_article: $('#edit-id-article').val(),
+            code_article: $('#edit-code-article').val(),
+            libelle_article: $('#edit-libelle-article').val(),
+            quantite: $('#edit-quantite').val(),
+            prix_achat: $('#edit-prix-achat').val()
+        };
+
+        $.ajax({
+            url: '/edit_article',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(articleData),
+            success: function(response) {
+                alert('Article mis à jour avec succès !');
+                $('#editArticleModal').hide();  // Fermer le modal après la mise à jour
+            },
+            error: function(xhr, status, error) {
+                alert('Erreur lors de la mise à jour de l\'article.');
+            }
+        });
+    });
+</script>
+
+
+
+
+<style>
+    /* Styles pour le modal */
+#editArticleModal, #editUsineModal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.submit-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+.close-button {
+    float: right;
+    cursor: pointer;
+    font-size: 24px;
+    color: #888;
+}
+
+.close-button:hover {
+    color: #ff3b30;
+}
+
+</style>
+
+
+
+<!-- Modal pour supprimer l'article -->
+
+
+
+
+
+
+<!-- Modal structure for Add Article -->
+<div id="addArticleModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Add New Article</h2>
+        <form id="add-article-form">
+            <div class="form-group">
+                <label for="code_article">Code Article:</label>
+                <input type="text" id="code_article" name="code_article" required>
+            </div>
+            <div class="form-group">
+                <label for="libelle_article">Libellé Article:</label>
+                <input type="text" id="libelle_article" name="libelle_article" required>
+            </div>
+            <div class="form-group">
+                <label for="prix_achat">Prix d'Achat:</label>
+                <input type="number" step="0.01" id="prix_achat" name="prix_achat" required>
+            </div>
+            <div class="form-group">
+                <label for="emplacement">Emplacement:</label>
+                <input type="text" id="emplacement" name="emplacement" required>
+            </div>
+            <div class="form-group">
+                <label for="quantite">Quantité:</label>
+                <input type="number" id="quantite" name="quantite" required>
+            </div>
+            <div class="form-group">
+                <label for="fournisseur">Fournisseur:</label>
+                <input type="text" id="fournisseur" name="fournisseur" required>
+            </div>
+            <div class="form-group">
+                <label for="quantite_min">Quantité Minimale:</label>
+                <input type="number" id="quantite_min" name="quantite_min" required>
+            </div>
+            <button type="submit" class="submit-button">Save Article</button>
+        </form>
+    </div>
+</div>
+
+<script>
+	$(document).ready(function() {
+    // Afficher le modal lors du clic sur "Add Article"
+    $('#add-article-li').on('click', function() {
+        $('#addArticleModal').show();
+    });
+
+    // Fermer le modal
+    $('.close-button').on('click', function() {
+        $('#addArticleModal').hide();
+    });
+
+    // Soumettre le formulaire pour ajouter un article
+    $('#add-article-form').on('submit', function(event) {
+        event.preventDefault(); // Empêche le rechargement de la page
+
+        // Collecter les données du formulaire
+        const articleData = {
+            code_article: $('#code_article').val(),
+            libelle_article: $('#libelle_article').val(),
+            prix_achat: $('#prix_achat').val(),
+            emplacement: $('#emplacement').val(),
+            quantite: $('#quantite').val(),
+            fournisseur: $('#fournisseur').val(),
+            quantite_min: $('#quantite_min').val(),
+        };
+
+        // Envoyer les données à votre serveur sous forme de JSON
+        $.ajax({
+            url: '/add_article',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(articleData),
+            success: function(response) {
+                alert('Article ajouté avec succès !');
+                $('#addArticleModal').hide(); // Fermer le modal
+            },
+            error: function(xhr, status, error) {
+                alert('Erreur lors de l\'ajout de l\'article.');
+                console.error("Error adding article:", status, error);
+            }
+        });
+    });
+});
+
+</script>
+<li id="fournisseur-li">
+    <a href="#" id="open-fournisseur-modal">
+        <i class='bx bxs-car'></i>
+        <span class="text">Fournisseur</span>
+    </a>
+</li>
+
+<div id="addFournisseur" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="close-fournisseur-modal">&times;</span>
+        <h2>Add New Fournisseur</h2>
+        <form id="add-fournisseur-form" action="/add_fournisseur" method="POST">
+            <div class="form-group">
+                <label for="nom_fournisseur">Nom de Fournisseur:</label>
+                <input type="text" id="nom_fournisseur" name="nom_fournisseur" required>
+            </div>
+            <div class="form-group">
+                <label for="matricule_fiscale">Matricule Fiscale:</label>
+                <input type="text" id="matricule_fiscale" name="matricule_fiscale">
+            </div>
+            <div class="form-group">
+                <label for="addresse">Addresse:</label>
+                <input type="text" id="addresse" name="addresse" >
+            </div>
+            <div class="form-group">
+                <label for="telephone">Telephone:</label>
+                <input type="text" id="telephone" name="telephone" >
+            </div>
+            <button type="submit" class="submit-button">Save Fournisseur</button>
+        </form>
+    </div>
+</div>
+<style>
+    /* Modal styles */
+    #addFournisseur {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    var modal = document.getElementById("addFournisseur");
+    var openButton = document.getElementById("open-fournisseur-modal");
+    var closeButton = document.getElementById("close-fournisseur-modal");
+
+    // Ouvrir le modal
+    openButton.onclick = function() {
+        modal.style.display = "flex"; // Utiliser flex pour centrer le contenu
+    };
+
+    // Fermer le modal
+    closeButton.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    // Fermer le modal en cliquant en dehors du contenu
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+});
+
+
+</script>
+
+<!-- Liste principale Usines -->
+
+    <!-- Sous-liste masquée par défaut -->
+    
+        <li id="add-usine-li">
+            <a href="#" id="open-add-usine-modal">
+                <i class='bx bxs-buildings'></i>
+                <span class="text">Ajouter Usine</span>
+            </a>
+        </li>
+        <li id="edit-usine-li">
+            <a href="#" id="open-edit-usine-modal">
+                <i class='bx bxs-buildings'></i>
+                <span class="text">Éditer Usine</span>
+            </a>
+        </li>
+        
+    
+<style>
+    /* Style pour masquer la sous-liste par défaut */
+#usines-options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: none; /* Masquer par défaut */
+}
+
+#usines-options li {
+    margin-left: 20px; /* Décaler un peu les sous-options */
+}
+
+#usines-options a {
+    display: block;
+    padding: 5px;
+    text-decoration: none;
+    color: #000; /* Ajustez selon votre thème */
+}
+
+#usines-options a:hover {
+    background-color: #f0f0f0; /* Effet hover pour les liens */
+}
+
+/* Assurez-vous que le reste des éléments <li> ne sont pas couverts */
+#usines-li {
+    position: relative;
+}
+
+</style>
+<script>
+    // Bascule l'affichage des options quand on clique sur "Usines"
+$('#toggle-usines').on('click', function(event) {
+    event.preventDefault();  // Empêche le comportement par défaut du lien
+    $('#usines-options').toggle();  // Affiche ou masque les options
+});
+
+</script>
+
+
+
+<div id="addUsineModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Ajouter Usine :</h2>
+        
+        
+        <form action="/add_usine" method="POST">
+            <div class="form-group">
+                <label for="nom-usine">Nom Usine :</label>
+                <input type="text" id="nom-usine" name="nom_usine" required>
+            </div>
+            <div class="form-group">
+                <label for="region-usine">Region :</label>
+                <input type="text" id="region-usine" name="region" required>
+            </div>
+            <div class="form-group">
+                <label for="addresse-usine">Addresse :</label>
+                <input type="text" id="addresse-usine" name="addresse">
+            </div>
+            <div class="form-group">
+                <label for="telephone-usine">Téléphone :</label>
+                <input type="text" id="telephone-usine" name="telephone">
+            </div>
+            <div class="form-group">
+                <label for="etat-usine">État :</label>
+                <input type="text" id="etat-usine" name="etat" required>
+            </div>
+            <div class="form-group">
+                <label for="role-usine">Rôle :</label>
+                <input type="text" id="role-usine" name="role">
+            </div>
+            <button type="submit">Ajouter Usine</button>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                        {% for category, message in messages %}
+                            <li class="{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+        </form>
+        
+    </div>
+</div>
+<style>/* CSS spécifique pour le modal */
+    #addUsineModal {
+        position: fixed; /* S'assurer que le modal est au-dessus de tout */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Fond transparent sombre */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* Assurer une couche supérieure */
+    }
+    
+    #addUsineModal .modal-content{
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 50%; /* Ajuster la taille selon vos besoins */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Style du bouton close */
+    .close-button {
+        float: right;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    
+    /* Éviter que ce CSS n'interfère avec les autres */
+    #addUsineModal * {
+        box-sizing: border-box;
+    }
+    
+
+</style>
+
+<script>
+    // Ouvrir le modal quand on clique sur le lien "Ajouter Usine"
+$('#open-add-usine-modal').on('click', function(event) {
+    event.preventDefault();
+    $('#addUsineModal').show();  // Afficher le modal d'ajout
+});
+
+// Fermer le modal quand on clique sur le bouton "close"
+$('.close-button').on('click', function() {
+    $('#addUsineModal').hide();  // Cacher le modal d'ajout
+});
+
+// Fermer le modal quand on clique en dehors de la zone du modal
+$(window).on('click', function(event) {
+    if (event.target.id === 'addUsineModal') {
+        $('#addUsineModal').hide();  // Cacher le modal d'ajout si on clique à l'extérieur
+    }
+});
+
+</script>
+
+
+
+
+<div id="editUsineModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Éditer Usine</h2>
+        <div class="form-group">
+            <label for="search-usine">Rechercher Usine :</label>
+            <input type="text" id="search-usine" placeholder="Entrer le nom de l'usine">
+            <button id="search-usine-button">Rechercher</button>
+        </div>
+        <form id="edit-usine-form">
+            <input type="hidden" id="edit-id-usine" name="id_usine" required readonly>
+        
+            <div class="form-group">
+                <label for="edit-nom-usine">Nom Usine :</label>
+                <input type="text" id="edit-nom-usine" name="nom_usine" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-region-usine">Region :</label>
+                <input type="text" id="edit-region-usine" name="region" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-addresse-usine">Addresse :</label>
+                <input type="text" id="edit-addresse-usine" name="addresse" >
+            </div>
+            <div class="form-group">
+                <label for="edit-telephone-usine">Telephone :</label>
+                <input type="text" id="edit-telephone-usine" name="telephone" >
+            </div>
+            <div class="form-group">
+                <label for="edit-etat-usine">Etat :</label>
+                <input type="text" id="edit-etat-usine" name="etat" >
+            </div>
+            <div class="form-group">
+                <label for="edit-role-usine">Role :</label>
+                <input type="text" id="edit-role-usine" name="role" >
+            </div>
+            <button type="submit" class="submit-button">Mettre à jour</button>
+        </form>
+        
+        
+    </div>
+</div>
+
+<script>
+    // Ouvrir le modal quand on clique sur le lien "Éditer Article"
+    $('#open-edit-usine-modal').on('click', function(event) {
+        event.preventDefault();
+        $('#editUsineModal').show();  // Afficher le modal
+    });
+
+    // Fermer le modal quand on clique sur le bouton "close"
+    $('.close-button').on('click', function() {
+        $('#editUsineModal').hide();  // Cacher le modal
+    });
+
+    // Fermer le modal quand on clique en dehors de la zone du modal
+    $(window).on('click', function(event) {
+        if (event.target.id === 'editUsineModal') {
+            $('#editUsineModal').hide();
+        }
+    });
+
+    // Rechercher l'usine lorsqu'on entre un nom d'usine et qu'on clique sur "Rechercher"
+// Rechercher l'usine lorsqu'on entre un nom d'usine et qu'on clique sur "Rechercher"
+$('#search-usine-button').on('click', function() {
+    var nom_usine = $('#search-usine').val();
+    
+    $.ajax({
+        url: '/get_usine_info',
+        type: 'GET',
+        data: { nom_usine: nom_usine },
+        success: function(response) {
+            if (response.error) {
+                alert(response.error);  // Affiche "L'usine n'existe pas" si l'usine n'est pas trouvée
+            } else {
+                // Pré-remplir les champs avec les informations de l'usine
+                $('#edit-id-usine').val(response.id_usine);
+                $('#edit-nom-usine').val(response.nom_usine); 
+                $('#edit-region-usine').val(response.region);
+                $('#edit-addresse-usine').val(response.addresse);
+                $('#edit-telephone-usine').val(response.telephone);
+                $('#edit-etat-usine').val(response.etat);
+                $('#edit-role-usine').val(response.role);
+            }
+        },
+        error: function(xhr, status, error) {
+            alert(nom_usine +" n'existe pas dans votre tableau");
+        }
+    });
+});
+
+
+    // Soumettre le formulaire pour mettre à jour l'article
+// Soumettre le formulaire pour mettre à jour l'usine
+$('#edit-usine-form').on('submit', function(event) {
+    event.preventDefault();
+
+    var usineData = {
+        id_usine: $('#edit-id-usine').val(),
+        nom_usine: $('#edit-nom-usine').val(),
+        region: $('#edit-region-usine').val(),
+        addresse: $('#edit-addresse-usine').val(),
+        telephone: $('#edit-telephone-usine').val(),
+        etat: $('#edit-etat-usine').val(),
+        role: $('#edit-role-usine').val()
+    };
+
+    $.ajax({
+        url: '/edit_usine',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(usineData),
+        success: function(response) {
+            alert('Usine mise à jour avec succès !');
+            $('#editUsineModal').hide();  // Fermer le modal après la mise à jour
+        },
+        error: function(xhr, status, error) {
+            alert('Erreur lors de la mise à jour de l\'usine.');
+        }
+    });
+});
+
+
+</script>
+
+
+
+
+
+
+
+
+
+			<li id="my-store-li">
+                <a href="#">
+                    <i class='bx bxs-shopping-bag-alt'></i>
+                    <span class="text">Magasin</span>
+                </a>
+            </li>
+			
+			
+            
+            <div id="articlesModal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>Store Articles</h2>
+                    <table id="articles-table">
+                        <thead>
+                            <tr>
+                                <th>Code Article</th>
+                                <th>Libelle Article</th>
+                                <th>Prix Achat</th>
+                                <th>Emplacement</th>
+                                <th>Quantité</th>
+                                <th>Fournisseur</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articles-body">
+                            <!-- Articles will be populated here -->
+                        </tbody>
+                    </table>
+                    <div id="pagination">
+                        <button id="prev-button" >Précédent</button>
+                        <button id="next-button" >Suivant</button>
+                    </div>
+                </div>
+            </div>
+            
+
+<!-- Modal CSS Styles -->
+<style>
+    #articlesModal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 600px;
+        overflow: auto;
+    }
+
+    .close-button {
+        margin-top: 50px;
+        padding-top: 50px;
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    #articles-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-right: 50px;
+    }
+
+    #articles-table th, #articles-table td {
+        
+        
+        
+        margin-right: 200px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #articles-table th {
+        background-color: #f2f2f2;
+        position: sticky;
+        top: 0;
+        margin-right: 200px;
+        text-align: left;
+        z-index: 10;
+    }
+
+    #pagination {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    #prev-button, #next-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #007bff; /* Couleur de fond */
+        color: white; /* Couleur du texte */
+    }
+
+    #prev-button:disabled, #next-button:disabled {
+        background-color: transparent; /* Couleur de fond transparente */
+        color: #ccc; /* Couleur du texte grisé */
+        cursor: not-allowed; /* Changement du curseur pour indiquer que le bouton est désactivé */
+    }
+</style>
+
+
+<!-- jQuery for AJAX and modal logic -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let currentPage = 1;
+        const articlesPerPage = 5;
+        let articlesData = []; // Pour stocker tous les articles récupérés
+
+        // Fonction pour afficher les articles de la page actuelle
+        function displayArticles() {
+            const startIndex = (currentPage - 1) * articlesPerPage;
+            const endIndex = startIndex + articlesPerPage;
+
+            // Vider le corps du tableau
+            $('#articles-body').empty();
+
+            // Afficher les articles pour la page actuelle
+            const currentArticles = articlesData.slice(startIndex, endIndex);
+            if (currentArticles.length === 0) {
+                $('#articles-body').append('<tr><td colspan="6">Aucun article trouvé</td></tr>');
+            } else {
+                currentArticles.forEach(function(article) {
+                    $('#articles-body').append(
+                        `<tr>
+                            <td>${article.code_article}</td>
+                            <td>${article.libelle_article}</td>
+                            <td>${article.prix_achat}</td>
+                            <td>${article.emplacement}</td>
+                            <td>${article.quantite}</td>
+                            <td>${article.fournisseur}</td>
+                        </tr>`
+                    );
+                });
+            }
+
+            // Gérer l'affichage des boutons de pagination
+            $('#prev-button').prop("disabled", currentPage === 1); // Désactiver le bouton précédent si à la première page
+            $('#next-button').prop("disabled", endIndex >= articlesData.length); // Désactiver le bouton suivant si à la dernière page
+        }
+
+        // Quand le 'My Store' list item est cliqué
+        $('#my-store-li').on('click', function() {
+            // Récupérer les articles depuis le serveur
+            $.get('/get_articles', function(data) {
+                articlesData = data; // Stocker les articles récupérés
+                currentPage = 1; // Réinitialiser la page actuelle
+                displayArticles(); // Afficher les articles
+                $('#articlesModal').show();
+            }).fail(function(xhr, status, error) {
+                console.error("Erreur lors de la récupération des articles :", status, error);
+            });
+        });
+
+        // Navigation vers la page suivante
+        $('#next-button').on('click', function() {
+            if ((currentPage * articlesPerPage) < articlesData.length) {
+                currentPage++;
+                displayArticles();
+            }
+        });
+
+        // Navigation vers la page précédente
+        $('#prev-button').on('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayArticles();
+            }
+        });
+
+        // Fermer le modal
+        $('.close-button').on('click', function() {
+            $('#articlesModal').hide();
+        });
+    });
+</script>
+
+<li>
+    <a href="/analytics">
+        <i class='bx bxs-doughnut-chart'></i>
+        <span class="text">Analytics</span>
+    </a>
+</li>
+
+			
+			<li id="user-list-item" style="cursor: pointer;">
+				<a href="#">
+					<i class='bx bxs-group' ></i>
+					<span class="text">Team</span>
+				</a>
+			</li>
+            <!-- Modal Structure for Showing Users -->
+<div id="userModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Users List</h2>
+        <table id="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Emplacement</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="user-body">
+                <!-- User data will be populated here dynamically -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal styles (reuse the same CSS you already have) -->
+<style>
+    /* Modal styles */
+    #userModal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 600px;
+        overflow: auto;
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    /* Table styles */
+    #user-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #user-table th, #user-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #user-table th {
+        background-color: #f2f2f2;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // When the user list item is clicked
+        $('#user-list-item').on('click', function() {
+            // Fetch all users from the server
+            $.get('/users', function(data) {
+                $('#user-body').empty();  // Clear previous entries
+                
+                // Check if data is empty
+                if (data.length === 0) {
+                    $('#user-body').append('<tr><td colspan="4">No users found</td></tr>');
+                } else {
+                    data.forEach(function(user) {
+                        $('#user-body').append(
+                            `<tr>
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.emplacement}</td>
+                                <td>${user.role}</td>
+                            </tr>`
+                        );
+                    });
+                }
+    
+                $('#userModal').show();  // Show the modal
+            }).fail(function(xhr, status, error) {
+                console.error("AJAX Error:", status, error);  // Log any AJAX errors
+            });
+        });
+    
+        // When the close button is clicked
+        $('.close-button').on('click', function() {
+            $('#userModal').hide();  // Hide the modal
+        });
+    });
+    </script>
+    
+            <!-- List item for adding a new user -->
+<li id="add-user-list-item">
+    <a href="#">
+        <i class='bx bxs-user-plus'></i>
+        <span class="text">Ajouter Utulisateur</span>
+    </a>
+</li>
+
+
+<!-- Modal for adding a new user -->
+<div id="AdduserModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Add New User</h2>
+        
+        <!-- Form for adding a new user -->
+        <form id="user-form" action="/add_user" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter username" required>
+        
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
+        
+            <label for="emplacement">Emplacement:</label>
+            <input type="text" id="emplacement" name="emplacement" placeholder="Enter emplacement" required>
+        
+            <label for="role">Role:</label>
+            <input type="text" id="role" name="role" placeholder="Enter role" required>
+            
+            <button type="submit">Add User</button>
+        </form>
+        
+    </div>
+</div>
+
+<style>
+    /* Modal styles */
+    #AdduserModal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+    // Show modal when the list item is clicked
+    $('#add-user-list-item').on('click', function() {
+        $('#AdduserModal').show();  // Show the modal
+    });
+
+    // Close modal when the close button is clicked
+    $('.close-button').on('click', function() {
+        $('#AdduserModal').hide();  // Hide the modal
+    });
+    
+
+    // You don't need to handle the form submission with AJAX if you want to use request.form.
+    // The form will be submitted as a regular POST request.
+       // Function to display message in the modal
+       function showMessage(message) {
+        $('#modalMessage').text(message);
+        $('#messageModal').show(); // Show the modal
+    }
+
+    // Close modal function
+    window.closeModal = function() {
+        $('#messageModal').hide(); // Hide the modal
+    }
+});
+
+</script>
+<!-- Sidebar avec lien pour éditer utilisateur -->
+<li id="edit-user-li">
+    <a href="#">
+        <i class='bx bxs-edit'></i>
+        <span class="text">Éditer Utilisateur</span>
+    </a>
+</li>
+
+<div id="editUserModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Éditer Utilisateur</h2>
+        <div class="form-group">
+            <label for="search-username">Rechercher Utilisateur:</label>
+            <input type="text" id="search-username" placeholder="Entrer nom d'utilisateur">
+            <button id="search-user-button">Rechercher</button>
+        </div>
+        <form id="edit-user-form">
+            <div class="form-group">
+                <label for="edit-username">Nom d'utilisateur:</label>
+                <input type="text" id="edit-username" name="username"  readonly>
+            </div>
+            <div class="form-group">
+                <label for="edit-emplacement">Emplacement:</label>
+                <input type="text" id="edit-emplacement" name="emplacement" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-role">Rôle:</label>
+                <input type="text" id="edit-role" name="role" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-password">Nouveau mot de passe (laisser vide si inchangé):</label>
+                <input type="password" id="edit-password" name="password">
+            </div>
+            <button type="submit" class="submit-button">Mettre à jour</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+    $('#edit-user-li').on('click', function() {
+        // Afficher le modal
+        $('#editUserModal').show();
+    });
+
+    // Recherche de l'utilisateur lorsqu'on entre un nom d'utilisateur dans la zone de recherche
+    $('#search-user-button').on('click', function() {
+        var username = $('#search-username').val(); // Récupère le nom d'utilisateur entré
+        $.ajax({
+            url: '/get_user_info',
+            type: 'GET',
+            data: { username: username },
+            success: function(response) {
+                if (response.error) {
+                    alert(response.error); // Si l'utilisateur n'est pas trouvé, afficher une alerte
+                } else {
+                    // Pré-remplir les champs du modal avec les informations de l'utilisateur
+                    $('#edit-username').val(response.username);
+                    $('#edit-emplacement').val(response.emplacement);
+                    $('#edit-role').val(response.role);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Erreur lors de la recherche de l\'utilisateur');
+            }
+        });
+    });
+
+    // Soumettre le formulaire pour mettre à jour l'utilisateur
+    $('#edit-user-form').on('submit', function(event) {
+        event.preventDefault();
+
+        var userData = {
+            username: $('#edit-username').val(),
+            emplacement: $('#edit-emplacement').val(),
+            role: $('#edit-role').val(),
+            password: $('#edit-password').val()
+        };
+
+        $.ajax({
+            url: '/edit_user',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(userData),
+            success: function(response) {
+                alert('Utilisateur mis à jour avec succès !');
+                $('#editUserModal').hide(); // Fermer le modal après la mise à jour
+            },
+            error: function(xhr, status, error) {
+                alert('Erreur lors de la mise à jour de l\'utilisateur.');
+            }
+        });
+    });
+
+    // Fermer le modal
+    $('.close-button').on('click', function() {
+        $('#editUserModal').hide();
+    });
+});
+
+</script>
+
+<style>
+    /* Styles pour le modal */
+#editUserModal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Styles du formulaire */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.submit-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+/* Styles pour fermer le modal */
+.close-button {
+    float: right;
+    cursor: pointer;
+    font-size: 24px;
+    color: #888;
+}
+
+.close-button:hover {
+    color: #ff3b30;
+}
+
+</style>
+
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" style="display:none;"></div>
+
+
+
+
+
+
+
+		</ul>
+		
+		<ul class="side-menu">
+			
+			<li>
+				<a href="/logout" class="logout">
+					<i class='bx bxs-log-out-circle' ></i>
+					<span class="text" >Logout</span>
+				</a>
+                
+			</li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+			<a href="#" class="nav-link"></a>
+<!-- Search Form -->
+<form id="search-form" action="#" method="POST">
+    <div class="form-input">
+        <input type="search" id="search-query" name="search_query" placeholder="Search..." required>
+        <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+    </div>
+</form>
+
+<!-- Modal -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        
+        <div id="modal-body">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="date-filter-form" method="POST" action="/search_articles">
+                <div class="form-group">
+                    <label for="date-debut">Date de début :</label>
+                    <div class="input-group">
+                        <input type="date" id="date-debut" name="date_debut" class="form-control">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="date-fin">Date de fin :</label>
+                    <div class="input-group">
+                        <input type="date" id="date-fin" name="date_fin" class="form-control">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Appliquer les filtres</button>
+            </form>
+            <table id="results-table" class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Code Article</th>
+                        <th>Libelle</th>
+                        <th>Prix Achat</th>
+                        <th>Quantite</th>
+                        <th>Fournisseur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Les résultats seront insérés ici -->
+                </tbody>
+            </table>
+            <button id="export-csv-btn" class="export-btn">Exporter en CSV</button>
+            <button id="print-btn">Imprimer</button>
+
+
+        </div>
+    </div>
+</div>
+<style>
+    /* Modal */
+.modal {
+    display: none; /* Le modal est masqué par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #000000;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: rgb(255, 0, 0);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Style spécifique pour le tableau dans le modal */
+.responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+.responsive-table th, .responsive-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+.responsive-table th {
+    background-color: #f2f2f2;
+}
+
+.responsive-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log("Page loaded");
+
+    var modal = document.getElementById("searchModal");
+    var closeBtn = document.querySelector('.close');
+
+    // Ne pas ouvrir automatiquement le modal
+    modal.style.display = "none";
+
+    // Fonction pour gérer la soumission du formulaire de recherche
+    document.getElementById("search-form").onsubmit = function(event) {
+        event.preventDefault();  // Empêche la soumission classique du formulaire
+
+        var searchQuery = document.getElementById("search-query").value;
+        var tableBody = document.querySelector("#results-table tbody");
+
+        // Vérifier que le champ de recherche n'est pas vide
+        if (searchQuery.trim() === "") {
+            console.log("Search query is empty, modal won't open");
+            return; // Ne pas ouvrir le modal si la requête de recherche est vide
+        }
+
+        fetch('/search_articles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'search_query=' + encodeURIComponent(searchQuery),
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableBody.innerHTML = ''; // Efface les résultats précédents
+
+            if (data.articles.length > 0) {
+                data.articles.forEach(article => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td data-label="Code Article">${article.code_article}</td>
+                        <td data-label="Libelle">${article.libelle_article}</td>
+                        <td data-label="Prix Achat">${article.prix_achat}</td>
+                        <td data-label="Quantite">${article.quantite}</td>
+                        <td data-label="Fournisseur">${article.fournisseur}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5">No articles found</td></tr>';
+            }
+
+            // Afficher le modal une fois les résultats obtenus
+            modal.style.display = "block";
+        });
+    };
+
+    // Fermer le modal quand on clique sur le bouton de fermeture
+    closeBtn.onclick = function() {
+        console.log("Modal closed");
+        modal.style.display = "none";
+    };
+
+    // Fermer le modal si on clique en dehors de celui-ci
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    // Fonction pour exporter les résultats du tableau en fichier CSV
+    document.getElementById("export-csv-btn").onclick = function() {
+    var table = document.getElementById("results-table");
+    var rows = Array.from(table.querySelectorAll('tr'));
+
+    // Créer une feuille de calcul
+    var workbook = XLSX.utils.book_new();
+    var worksheet_data = [];
+
+    // Extraire les en-têtes du tableau (th)
+    var headers = Array.from(rows[0].querySelectorAll('th')).map(header => header.textContent.trim());
+    worksheet_data.push(headers); // Ajouter les en-têtes comme première ligne
+
+    // Extraire les données du tableau (td)
+    rows.slice(1).forEach(row => {
+        var rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+        worksheet_data.push(rowData); // Ajouter les données de chaque ligne
+    });
+
+    // Créer une feuille dans le workbook avec les données du tableau
+    var worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Articles");
+
+    // Exporter le fichier Excel
+    XLSX.writeFile(workbook, 'resultats_recherche_articles.xlsx');
+};
+    // Fonction pour imprimer le tableau
+    document.getElementById("print-btn").onclick = function() {
+        var table = document.getElementById("results-table").outerHTML;
+
+        // Ouvrir une nouvelle fenêtre pour l'impression
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Imprimer les résultats</title>');
+        printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: left; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(table); // Insérer le tableau dans la nouvelle fenêtre
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // Fermer le document pour qu'il soit prêt à être imprimé
+        printWindow.focus();
+        printWindow.print(); // Ouvrir la boîte de dialogue d'impression
+        printWindow.close(); // Fermer la fenêtre d'impression après l'impression
+    };
+    // Fermer le modal si on clique en dehors de celui-ci
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+});
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+<!-- Modal Structure for Date Filters -->
+
+
+<!-- Modal Styles -->
+<style>
+    /* Modal styles */
+    #addFournisseur {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+<!-- JavaScript/jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let startDateSelected = false;
+
+    // Show the filter modal on icon click
+    $('#filter-icon').on('click', function() {
+        $('#filterModal').show();
+    });
+
+    // Handle closing the modal
+    $('.close-button').on('click', function() {
+        $('#filterModal').hide();
+    });
+
+    // Automatically set start date and end date behavior
+    $('#start-date').on('change', function() {
+        if (!startDateSelected) {
+            startDateSelected = true;
+            $('#end-date').focus(); // Focus on the end date after selecting start date
+        }
+    });
+
+    // Handle filter form submission
+    $('#filter-form').on('submit', function(e) {
+        e.preventDefault();
+        var startDate = $('#start-date').val();
+        var endDate = $('#end-date').val();
+        var query = $('#search-query').val();
+
+        // Ensure both dates are selected
+        if (startDate && endDate) {
+            // Make an AJAX request with the search query and selected dates
+            $.get('/search_articles', { query: query, start: startDate, end: endDate }, function(data) {
+                // Clear any previous search results
+                $('#search-results-body').empty();
+
+                // Check if there are any results
+                if (data.length === 0) {
+                    $('#search-results-body').append('<tr><td colspan="6">No matching articles found</td></tr>');
+                } else {
+                    // Populate the search results in the table
+                    data.forEach(function(article) {
+                        $('#search-results-body').append(
+                            `<tr>
+                                <td>${article.code_article}</td>
+                                <td>${article.libelle_article}</td>
+                                <td>${article.prix_achat}</td>
+                                <td>${article.emplacement}</td>
+                                <td>${article.quantite}</td>
+                                <td>${article.fournisseur}</td>
+                            </tr>`
+                        );
+                    });
+                }
+
+                // Close the modal after applying filters
+                $('#filterModal').hide();
+            });
+        } else {
+            alert("Please select both a start and end date.");
+        }
+    });
+
+    // Handle the search form submission (without date filter)
+    $('#search-form').on('submit', function(e) {
+        e.preventDefault();
+        var query = $('#search-query').val();
+
+        // Make an AJAX request to the search route
+        $.get('/search_articles', { query: query }, function(data) {
+            // Clear any previous search results
+            $('#search-results-body').empty();
+
+            // Check if there are any results
+            if (data.length === 0) {
+                $('#search-results-body').append('<tr><td colspan="6">No matching articles found</td></tr>');
+            } else {
+                // Populate the search results in the table
+                data.forEach(function(article) {
+                    $('#search-results-body').append(
+                        `<tr>
+                            <td>${article.code_article}</td>
+                            <td>${article.libelle_article}</td>
+                            <td>${article.prix_achat}</td>
+                            <td>${article.emplacement}</td>
+                            <td>${article.quantite}</td>
+                            <td>${article.fournisseur}</td>
+                        </tr>`
+                    );
+                });
+            }
+
+            // Show the modal with search results
+            $('#searchModal').show();
+        });
+    });
+});
+</script>
+
+
+
+
+<!-- Modal Styles -->
+
+<!-- Modal Styles -->
+
+
+
+			
+			<input type="checkbox" id="switch-mode" hidden>
+			<label for="switch-mode" class="switch-mode"></label>
+			<a href="#" class="notification">
+                <i class='bx bxs-bell'></i>
+                <span class="num" id="low-stock-count">{{ low_stock_count }}</span>
+            </a>
+            
+            
+            
+            <a href="#" class="notification">
+				<i class='bx bxs-message' ></i>
+				<span class="num">1</span>
+			</a>
+            <a href="/maps" class="map">
+				<img src="{{ url_for('static', filename='globe.png') }}" alt="Globe Icon" class="icon-globe" style="width: 25px; height: 25px; ">
+
+				<span class="map"></span>
+			</a>
+			
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					
+					<ul class="breadcrumb">
+						<li>
+							<a href="#" >Dashboard</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						
+					</ul>
+				</div>
+				
+			</div>
+
+			<ul class="box-info">
+				<li  id="orders-list-item" style="cursor: pointer;background-color: #c3e3f0;">
+                    <i class='bx bxs-bookmark-plus'></i>
+                    <span class="text">
+                        <h3 class="orders-count">{{ orders_count }}</h3>  <!-- Display the count here --> 
+                        <p>Demandes d'Achats</p>
+                    </span>
+                </li>
+                <!-- Modal structure -->
+<div id="ordersModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Demandes d'Achats</h2>
+        <table id="orders-table">
+            <thead>
+                <tr>
+                    <th>Code Demande</th>
+                    <th>Code Article</th>
+                    <th>Libelle Article</th>
+                    <th>Quantité</th>
+                    <th>Emplacement</th>
+                    <th>Date</th>
+                    <th>Demandeur</th>
+                </tr>
+            </thead>
+            <tbody id="orders-body">
+                <!-- Orders will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+                
+<style>
+    /* Modal styles */
+    #ordersModal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 600px;
+        overflow: auto; /* Allow scrolling if content overflows */
+    }
+
+    .close-button {
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    /* Table styles */
+    #orders-table {
+        width: 100%;
+        border-collapse: collapse; /* Remove space between cells */
+    }
+
+    #orders-table th, #orders-table td {
+        padding: 12px; /* Add padding for spacing */
+        text-align: left; /* Align text to the left */
+        border-bottom: 1px solid #ddd; /* Add a bottom border */
+    }
+
+    #orders-table th {
+        background-color: #f2f2f2; /* Light gray background for headers */
+        position: sticky; /* Keep headers at the top */
+        top: 0; /* Stick to the top */
+        z-index: 10; /* Ensure headers are above the other cells */
+    }
+
+    /* Responsive styles */
+    @media (max-width: 600px) {
+        #orders-table th, #orders-table td {
+            padding: 8px; /* Adjust padding for smaller screens */
+            font-size: 14px; /* Adjust font size for smaller screens */
+        }
+    }
+</style>
+<script>
+$(document).ready(function() {
+    $('#orders-list-item').on('click', function() {
+        $.get('/pending_buys', function(data) {
+            console.log("AJAX Response:", data);  // Log the response data
+            $('#orders-body').empty();  // Clear previous entries
+            
+            // Check if data is empty
+            if (data.length === 0) {
+                $('#orders-body').append('<tr><td colspan="7">No pending orders found</td></tr>');
+            } else {
+                data.forEach(function(order) {
+                    $('#orders-body').append(
+                        `<tr>
+                            <td>${order.code_demande}</td>
+                            <td>${order.code_article}</td>
+                            <td>${order.libelle_article}</td>
+                            <td>${order.quantite}</td>
+                            <td>${order.emplacement}</td>
+                            <td>${new Date(order.date).toLocaleString()}</td>
+                            <td>${order.demandeur}</td>
+                        </tr>`
+                    );
+                });
+            }
+            $('#ordersModal').show();  // Show the modal
+        }).fail(function(xhr, status, error) {
+            console.error("AJAX Error:", status, error);  // Log any AJAX errors
+        });
+    });
+
+    $('.close-button').on('click', function() {
+        $('#ordersModal').hide();  // Hide the modal
+    });
+});
+</script>
+  <!-- User List Item to trigger modal -->
+<li id="orders-list-item" style="cursor: pointer;background-color: #ecc7bc;">
+    <i class='bx bxs-group'></i>
+    <span class="text">
+        <h3>{{ user_count }}</h3> <!-- Static count can be replaced with dynamic count later -->
+        <p>Utilisateurs</p>
+    </span>
+</li>
+
+
+<li id="total-sales-item" style="cursor: pointer;background-color: #b2db96;">
+    <i class='bx bxs-bookmark-minus'></i>
+    <span class="text">
+        <h3 id="total-sales-amount"class="sales-count">{{ sales_count }}</h3>
+        <p>Demandes de Ventes</p>
+
+    </span>
+</li>
+
+<!-- Modal structure for sales -->
+<div id="salesModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Demandes de Ventes</h2>
+        <table id="sales-table">
+            <thead>
+                <tr>
+                    
+                    <th>Code Article</th>
+                    <th>Libelle Article</th>
+                    <th>Quantité</th>
+                    <th>Emplacement</th>
+                    <th>Date</th>
+                    <th>Demandeur</th>
+                </tr>
+            </thead>
+            <tbody id="sales-body">
+                <!-- Sales will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+    #salesModal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 80%;
+    max-width: 600px;
+    overflow: auto; /* Allow scrolling if content overflows */
+}
+
+.close-button {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#sales-table {
+    width: 100%;
+    border-collapse: collapse; /* Remove space between cells */
+}
+
+#sales-table th, #sales-table td {
+    padding: 12px; /* Add padding for spacing */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #ddd; /* Add a bottom border */
+}
+
+#sales-table th {
+    background-color: #f2f2f2; /* Light gray background for headers */
+    position: sticky; /* Keep headers at the top */
+    top: 0; /* Stick to the top */
+    z-index: 10; /* Ensure headers are above the other cells */
+}
+
+</style>
+
+<script>$(document).ready(function() {
+    $('#total-sales-item').on('click', function() {
+        $.get('/pending_sales', function(data) {  // Appel AJAX pour récupérer les demandes de vente
+            console.log("AJAX Response:", data);  // Log the response data
+            $('#sales-body').empty();  // Clear previous entries
+            
+            // Check if data is empty
+            if (data.length === 0) {
+                $('#sales-body').append('<tr><td colspan="7">No pending sales found</td></tr>');
+            } else {
+                data.forEach(function(sale) {
+                    $('#sales-body').append(
+                        `<tr>
+                            
+                            <td>${sale.code_article}</td>
+                            <td>${sale.libelle_article}</td>
+                            <td>${sale.quantite}</td>
+                            <td>${sale.emplacement}</td>
+                            <td>${new Date(sale.date).toLocaleString()}</td>
+                            <td>${sale.demandeur}</td>
+                        </tr>`
+                    );
+                });
+            }
+            $('#salesModal').show();  // Show the modal
+        }).fail(function(xhr, status, error) {
+            console.error("AJAX Error:", status, error);  // Log any AJAX errors
+        });
+    });
+
+    $('.close-button').on('click', function() {
+        $('#salesModal').hide();  // Hide the modal
+    });
+});
+
+
+</script>
+				<li id="articles-list-item" style="cursor: pointer;background-color: #d3add8;" >
+					<i class='bx bxs-box'></i>
+					<span class="text">
+						<h3 class="articles-count">{{ articles_count }}</h3>  
+						<p>Total Articles</p>
+					</span>
+				</li>
+               <!-- List Items for Arrivals and Shipments -->
+               <li id="pending-arrivals-item" style="cursor: pointer;background-color: #c598a0;">
+                <i class='bx bxs-archive-in'></i>
+                <span class="text">
+                    <h3 id="total-arrivals-amount" class="arrivals-count">{{count_ventes_attente_arrive}}</h3>
+                    <p>Articles en attente d'arrivée</p>
+                </span>
+            </li>
+    
+            <li id="pending-shipments-item" style="cursor: pointer;background-color: #edf7b6;">
+                <i class='bx bxs-archive-out'></i>
+                <span class="text">
+                    <h3 id="total-shipments-amount" class="shipments-count">{{count_ventes_attente_expedition}}</h3>
+                    <p>Ventes en attente d'expédition</p>
+                </span>
+            </li>
+
+
+                <!-- Pending Arrivals Modal -->
+
+    <!-- Modal for pending arrivals -->
+    <div id="arrivalsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button-arrivals">&times;</span>
+            <h2>Articles en attente d'arrivée</h2>
+            <table id="arrivals-table">
+                <thead>
+                    <tr>
+                        <th>Code Demande</th>
+                        <th>Code Article</th>
+                        <th>Libellé Article</th>
+                        <th>Quantité</th>
+                        <th>Emplacement</th>
+                        <th>Date</th>
+                        <th>Demandeur</th>
+                    </tr>
+                </thead>
+                <tbody id="arrivals-body">
+                    <!-- Arrivals will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for pending shipments -->
+    <div id="shipmentsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button-shipments">&times;</span>
+            <h2>Ventes en attente d'expédition</h2>
+            <table id="shipments-table">
+                <thead>
+                    <tr>
+                        <th>Code Demande</th>
+                        <th>Code Article</th>
+                        <th>Libellé Article</th>
+                        <th>Quantité</th>
+                        <th>Emplacement</th>
+                        <th>Date</th>
+                        <th>Demandeur</th>
+                    </tr>
+                </thead>
+                <tbody id="shipments-body">
+                    <!-- Shipments will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+<!-- Styles -->
+<style>
+    /* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Black background with opacity */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close-button-arrivals, .close-button-shipments {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button-arrivals:hover, .close-button-shipments:hover {
+    cursor: pointer;
+    color: red;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+</style>
+
+<!-- Scripts for Modals -->
+<script>
+    $(document).ready(function() {
+    // Fetch pending arrivals when clicking the arrivals list item
+    $('#pending-arrivals-item').on('click', function() {
+        $.get('/pending_arrivals', function(data) {
+            $('#arrivals-body').empty();  // Clear previous entries
+
+            if (data.length === 0) {
+                $('#arrivals-body').append('<tr><td colspan="7">No pending arrivals found</td></tr>');
+            } else {
+                data.forEach(function(article) {
+                    $('#arrivals-body').append(
+                        `<tr>
+                            <td>${article.code_demande}</td>
+                            <td>${article.code_article}</td>
+                            <td>${article.libelle_article}</td>
+                            <td>${article.quantite}</td>
+                            <td>${article.emplacement}</td>
+                            <td>${new Date(article.date).toLocaleString()}</td>
+                            <td>${article.demandeur}</td>
+                        </tr>`
+                    );
+                });
+            }
+            $('#arrivalsModal').show();  // Show the arrivals modal
+        }).fail(function(xhr, status, error) {
+            console.error("AJAX Error (Arrivals):", status, error);
+        });
+    });
+
+    // Fetch pending shipments when clicking the shipments list item
+    $('#pending-shipments-item').on('click', function() {
+        $.get('/pending_shipments', function(data) {
+            $('#shipments-body').empty();  // Clear previous entries
+
+            if (data.length === 0) {
+                $('#shipments-body').append('<tr><td colspan="7">No pending shipments found</td></tr>');
+            } else {
+                data.forEach(function(sale) {
+                    $('#shipments-body').append(
+                        `<tr>
+                            <td>${sale.code_demande}</td>
+                            <td>${sale.code_article}</td>
+                            <td>${sale.libelle_article}</td>
+                            <td>${sale.quantite}</td>
+                            <td>${sale.emplacement}</td>
+                            <td>${new Date(sale.date).toLocaleString()}</td>
+                            <td>${sale.demandeur}</td>
+                        </tr>`
+                    );
+                });
+            }
+            $('#shipmentsModal').show();  // Show the shipments modal
+        }).fail(function(xhr, status, error) {
+            console.error("AJAX Error (Shipments):", status, error);
+        });
+    });
+
+    // Close modals
+    $('.close-button-arrivals').on('click', function() {
+        $('#arrivalsModal').hide();  // Hide the arrivals modal
+    });
+
+    $('.close-button-shipments').on('click', function() {
+        $('#shipmentsModal').hide();  // Hide the shipments modal
+    });
+});
+
+</script>
+
+			</ul>
+			</ul>
+
+            
+
+  
+<div class="table-data" >
+    <div class="order">
+        <div class="head" >
+            <h3>Articles Recents</h3>
+            <button id="export-options-btn">Exporter</button>
+            <div id="export-options" name="export-options" style="display: none;">
+                <button id="export-recent-excel-btn">Exporter en Excel</button>
+                <button id="print-recent-btn">Imprimer</button>
+            </div>
+            
+            <!-- Icone de filtre -->
+        </div>
+     
+        <table style="background-color: #b5d3df;" >
+            <thead >
+                <tr >
+                    <th style="background-color: #e3ee7b;text-align:center;">Lots</th>
+                    <th style="background-color: #bbe4ee;text-align:center;">Code Article</th>
+                    <th style="background-color: #b7dfb5;text-align:center;">Libelle Article</th> <!-- Change from User to Libelle Article -->
+                    <th style="background-color: #d6c1d4;text-align:center;">Date Order</th>
+                    <th style="background-color: #cea8c1;text-align:center;">Assignation</th>
+                    <th style="background-color: #d7dfb5;text-align:center;">Quantité</th>
+                    <th style="background-color: #dfc1b5;text-align:center;">Fournisseur</th>
+                </tr>
+            </thead>
+            <tbody id="recent-orders-body">
+                <!-- The recent orders will be dynamically populated here -->
+            </tbody>
+        </table>
+    </div>
+
+
+<script>
+$(document).ready(function() {
+    // Fetch recent orders when the page loads
+    function fetchRecentOrders() {
+        $.get('/recent_orders', function(data) {
+            let ordersBody = $('#recent-orders-body');
+            ordersBody.empty();  // Clear any previous entries
+
+            // Loop through the orders and append rows to the table
+            data.forEach(function(order) {
+                ordersBody.append(`
+                    <tr>
+                        <td style="background-color: #e3ee8b; text-align:center;">${order.id_article}</td>
+                        <td style="background-color: #dbe4fe; text-align:center;">${order.code_article}</td>
+                        <td style="background-color: #b7df90; text-align:center;">${order.libelle_article}</td>  <!-- Display libelle article -->
+                        <td style="background-color: #d6c1c4;text-align:center;">${order.date_order}</td>
+                        <td style="background-color: #cea8b1;text-align:center;">${order.emplacement}</td>
+                        <td style="background-color: #d7dfa5;text-align:center;">${order.quantite}</td>
+                        <td style="background-color: #dfc1b5;text-align:center;">${order.fournisseur}</td>
+                    </tr>
+                `);
+            });
+        }).fail(function(xhr, status, error) {
+            console.error("Error fetching recent orders:", status, error);
+        });
+    }
+
+    // Call the function to fetch and display recent orders
+    fetchRecentOrders();
+
+    // Afficher ou masquer les options d'exportation
+    $('#export-options-btn').click(function() {
+        $('#export-options').toggle();
+    });
+
+    // Fonction pour exporter les résultats en fichier Excel
+    document.getElementById("export-recent-excel-btn").onclick = function() {
+        var table = document.getElementById("recent-orders-body").parentElement;
+        var rows = Array.from(table.querySelectorAll('tr'));
+
+        // Créer une feuille de calcul Excel
+        var workbook = XLSX.utils.book_new();
+        var worksheet_data = [];
+
+        // Extraire les en-têtes du tableau (th)
+        var headers = Array.from(table.querySelectorAll('th')).map(header => header.textContent.trim());
+        worksheet_data.push(headers);
+
+        // Extraire les données du tableau (td)
+        rows.forEach(row => {
+            var rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+            worksheet_data.push(rowData);
+        });
+
+        // Créer une feuille dans le workbook avec les données du tableau
+        var worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Articles Recents");
+
+        // Exporter le fichier Excel
+        XLSX.writeFile(workbook, 'articles_recents.xlsx');
+    };
+
+    // Fonction pour imprimer le tableau des articles récents
+    document.getElementById("print-recent-btn").onclick = function() {
+        var table = document.getElementById("recent-orders-body").parentElement.outerHTML;
+
+        // Ouvrir une nouvelle fenêtre pour l'impression
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Imprimer les Articles Recents</title>');
+        printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: center; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(table); // Insérer le tableau dans la fenêtre
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print(); // Ouvrir la boîte de dialogue d'impression
+        printWindow.close(); // Fermer la fenêtre après impression
+    };
+
+});
+</script>
+
+	
+		
+
+			</div>
+            <div class="table-data">
+                <div class="order">
+                    <div class="head">
+                        <h3>Fournisseurs</h3>
+                        <button id="export-fournisseurs-btn">Exporter</button>
+                        <div id="export-options-fournisseurs" style="display: none;">
+                            <button id="export-fournisseurs-excel-btn">Exporter en Excel</button>
+                            <button id="print-fournisseurs-btn">Imprimer</button>
+                        </div>
+                    </div>
+                    <table style="background-color: #b5d3df;">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #e3ee7b; text-align:center;">Nom Fournisseur</th>
+                                <th style="background-color: #bbe4ee; text-align:center;">Matricule Fiscale</th>
+                                <th style="background-color: #b7dfb5; text-align:center;">Adresse</th>
+                                <th style="background-color: #d6c1d4; text-align:center;">Téléphone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fournisseurs-body">
+                            <!-- Les fournisseurs seront affichés ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script>
+                $(document).ready(function() {
+    // Fetch fournisseurs
+    function fetchFournisseurs() {
+        $.get('/fournisseurs', function(data) {
+            let fournisseursBody = $('#fournisseurs-body');
+            fournisseursBody.empty();  // Clear previous entries
+
+            // Populate the table with data
+            data.forEach(function(fournisseur) {
+                fournisseursBody.append(`
+                    <tr>
+                        <td style="background-color: #e3ee8b; text-align:center;">${fournisseur.nom_fournisseur}</td>
+                        <td style="background-color: #dbe4fe; text-align:center;">${fournisseur.matricule_fiscale}</td>
+                        <td style="background-color: #b7df90; text-align:center;">${fournisseur.addresse}</td>
+                        <td style="background-color: #d6c1c4;text-align:center;">${fournisseur.telephone}</td>
+                    </tr>
+                `);
+            });
+        }).fail(function(xhr, status, error) {
+            console.error("Error fetching fournisseurs:", status, error);
+        });
+    }
+
+    // Call the function to fetch and display fournisseurs
+    fetchFournisseurs();
+
+    // Toggle export options visibility
+    $('#export-fournisseurs-btn').click(function() {
+        $('#export-options-fournisseurs').toggle();
+    });
+
+    // Export to Excel functionality
+    $('#export-fournisseurs-excel-btn').click(function() {
+        var table = document.getElementById("fournisseurs-body").parentElement;
+        var rows = Array.from(table.querySelectorAll('tr'));
+
+        // Create Excel workbook
+        var workbook = XLSX.utils.book_new();
+        var worksheet_data = [];
+
+        // Extract headers
+        var headers = Array.from(table.querySelectorAll('th')).map(header => header.textContent.trim());
+        worksheet_data.push(headers);
+
+        // Extract row data
+        rows.forEach(row => {
+            var rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+            worksheet_data.push(rowData);
+        });
+
+        // Create worksheet and append it to the workbook
+        var worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Fournisseurs");
+
+        // Export Excel file
+        XLSX.writeFile(workbook, 'fournisseurs.xlsx');
+    });
+
+    // Print functionality
+    $('#print-fournisseurs-btn').click(function() {
+        var table = document.getElementById("fournisseurs-body").parentElement.outerHTML;
+
+        // Open new window for printing
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Imprimer les Fournisseurs</title>');
+        printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: center; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(table);  // Insert the table for printing
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    });
+});
+
+            </script>
+<div class="table-data">
+    <div class="order">
+        <div class="head">
+            <h3>Ventes Récentes</h3>
+            <button id="export-options-sales-btn">Exporter</button>
+            <div id="export-options-sales" style="display: none;">
+                <button id="export-recent-excel-btn">Exporter en Excel</button>
+                <button id="print-recent-btn">Imprimer</button>
+            </div>
+        </div>
+
+        <table style="background-color: #b5d3df;">
+            <thead>
+                <tr>
+                    <th style="background-color: #e3ee7b;text-align:center;">Code Demande</th>
+                    <th style="background-color: #bbe4ee;text-align:center;">Code Article</th>
+                    <th style="background-color: #b7dfb5;text-align:center;">Libellé Article</th>
+                    <th style="background-color: #d6c1d4;text-align:center;">Quantité</th>
+                    <th style="background-color: #cea8c1;text-align:center;">Prix Vente</th>
+                    <th style="background-color: #d7dfb5;text-align:center;">Emplacement</th>
+                    <th style="background-color: #dfc1b5;text-align:center;">Vers</th>
+                    <th style="background-color: #dfc1b5;text-align:center;">Date</th>
+                </tr>
+            </thead>
+            <tbody id="recent-sales-body">
+                <!-- Les ventes récentes seront chargées ici -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+		</main>
+		<!-- MAIN -->
+	</section>
+	<!-- CONTENT -->
+	<script>
+        $(document).ready(function() {
+    // Fonction pour récupérer les ventes récentes
+    function fetchRecentSales() {
+        $.get('/recent_sales', function(data) {
+            let salesBody = $('#recent-sales-body');
+            salesBody.empty();
+
+            // Remplir le tableau avec les données des ventes récentes
+            data.forEach(function(sale) {
+                salesBody.append(`
+                    <tr>
+                        <td style="background-color: #e3ee8b; text-align:center;">${sale.code_demande}</td>
+                        <td style="background-color: #dbe4fe; text-align:center;">${sale.code_article}</td>
+                        <td style="background-color: #b7df90; text-align:center;">${sale.libelle_article}</td>
+                        <td style="background-color: #d6c1c4;text-align:center;">${sale.quantite}</td>
+                        <td style="background-color: #cea8b1;text-align:center;">${sale.prix_vente}</td>
+                        <td style="background-color: #d7dfa5;text-align:center;">${sale.emplacement}</td>
+                        <td style="background-color: #dfc1b5;text-align:center;">${sale.vers}</td>
+                        <td style="background-color: #dfc1b5;text-align:center;">${sale.date}</td>
+                    </tr>
+                `);
+            });
+        }).fail(function(xhr, status, error) {
+            console.error("Erreur lors de la récupération des ventes récentes:", status, error);
+        });
+    }
+
+    // Appel de la fonction pour charger les ventes
+    fetchRecentSales();
+
+    // Afficher ou masquer les options d'exportation
+    $('#export-options-sales-btn').click(function() {
+        $('#export-options-sales').toggle();
+    });
+
+    // Exporter les résultats en fichier Excel pour le tableau des ventes récentes
+    $('#export-recent-excel-btn').click(function() {
+        var table = document.getElementById("recent-sales-body").parentElement;
+        var rows = Array.from(table.querySelectorAll('tr'));
+
+        var workbook = XLSX.utils.book_new();
+        var worksheet_data = [];
+
+        var headers = Array.from(table.querySelectorAll('th')).map(header => header.textContent.trim());
+        worksheet_data.push(headers);
+
+        rows.forEach(row => {
+            var rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+            worksheet_data.push(rowData);
+        });
+
+        var worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Ventes Récentes");
+        XLSX.writeFile(workbook, 'ventes_recent.xlsx');
+    });
+
+    // Imprimer le tableau des ventes récentes
+    $('#print-recent-btn').click(function() {
+        var table = document.getElementById("recent-sales-body").parentElement.outerHTML;
+
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Imprimer les Ventes Récentes</title>');
+        printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: center; }</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(table);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    });
+});
+
+    </script>
+
+	<script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+</body>
+</html>
+<style>
+	@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+a {
+	text-decoration: none;
+}
+
+li {
+	list-style: none;
+}
+
+:root {
+	--poppins: 'Poppins', sans-serif;
+	--lato: 'Lato', sans-serif;
+
+	--light: #F9F9F9;
+	--blue: #3C91E6;
+	--light-blue: #CFE8FF;
+	--grey: #eee;
+	--dark-grey: #AAAAAA;
+	--dark: #342E37;
+	--red: #DB504A;
+	--yellow: #FFCE26;
+	--light-yellow: #FFF2C6;
+	--orange: #FD7238;
+	--light-orange: #FFE0D3;
+}
+
+html {
+	overflow-x: hidden;
+}
+
+body.dark {
+	--light: #0C0C1E;
+	--grey: #060714;
+	--dark: #FBFBFB;
+}
+
+body {
+	background: var(--grey);
+	overflow-x: hidden;
+}
+
+
+
+
+
+/* SIDEBAR */
+#sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 280px;
+	height: 100%;
+	background: var(--light);
+	z-index: 2000;
+	font-family: var(--lato);
+	transition: .3s ease;
+	overflow-x: hidden;
+	scrollbar-width: none;
+}
+#sidebar::--webkit-scrollbar {
+	display: none;
+}
+#sidebar.hide {
+	width: 60px;
+}
+#sidebar .brand {
+	font-size: 24px;
+	font-weight: 700;
+	height: 56px;
+	display: flex;
+	align-items: center;
+	color: var(--blue);
+	position: sticky;
+	top: 0;
+	left: 0;
+	background: var(--light);
+	z-index: 500;
+	padding-bottom: 20px;
+	box-sizing: content-box;
+}
+#sidebar .brand .bx {
+	min-width: 60px;
+	display: flex;
+	justify-content: center;
+}
+#sidebar .side-menu {
+	width: 100%;
+	margin-top: 48px;
+}
+#sidebar .side-menu li {
+	height: 48px;
+	background: transparent;
+	margin-left: 6px;
+	border-radius: 48px 0 0 48px;
+	padding: 4px;
+}
+#sidebar .side-menu li.active {
+	background: var(--grey);
+	position: relative;
+}
+#sidebar .side-menu li.active::before {
+	content: '';
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	top: -40px;
+	right: 0;
+	box-shadow: 20px 20px 0 var(--grey);
+	z-index: -1;
+}
+#sidebar .side-menu li.active::after {
+	content: '';
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	bottom: -40px;
+	right: 0;
+	box-shadow: 20px -20px 0 var(--grey);
+	z-index: -1;
+}
+#sidebar .side-menu li a {
+	width: 100%;
+	height: 100%;
+	background: var(--light);
+	display: flex;
+	align-items: center;
+	border-radius: 48px;
+	font-size: 16px;
+	color: var(--dark);
+	white-space: nowrap;
+	overflow-x: hidden;
+}
+#sidebar .side-menu.top li.active a {
+	color: var(--blue);
+}
+#sidebar.hide .side-menu li a {
+	width: calc(48px - (4px * 2));
+	transition: width .3s ease;
+}
+#sidebar .side-menu li a.logout {
+	color: var(--red);
+}
+#sidebar .side-menu.top li a:hover {
+	color: var(--blue);
+}
+#sidebar .side-menu li a .bx {
+	min-width: calc(60px  - ((4px + 6px) * 2));
+	display: flex;
+	justify-content: center;
+}
+/* SIDEBAR */
+
+
+
+
+
+/* CONTENT */
+#content {
+	position: relative;
+	width: calc(100% - 280px);
+	left: 280px;
+	transition: .3s ease;
+}
+#sidebar.hide ~ #content {
+	width: calc(100% - 60px);
+	left: 60px;
+}
+
+
+
+
+/* NAVBAR */
+#content nav {
+	height: 56px;
+	background: var(--light);
+	padding: 0 24px;
+	display: flex;
+	align-items: center;
+	grid-gap: 24px;
+	font-family: var(--lato);
+	position: sticky;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+}
+#content nav::before {
+	content: '';
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	bottom: -40px;
+	left: 0;
+	border-radius: 50%;
+	box-shadow: -20px -20px 0 var(--light);
+}
+#content nav a {
+	color: var(--dark);
+}
+#content nav .bx.bx-menu {
+	cursor: pointer;
+	color: var(--dark);
+}
+#content nav .nav-link {
+	font-size: 16px;
+	transition: .3s ease;
+}
+#content nav .nav-link:hover {
+	color: var(--blue);
+}
+#content nav form {
+	max-width: 400px;
+	width: 100%;
+	margin-right: auto;
+}
+#content nav form .form-input {
+	display: flex;
+	align-items: center;
+	height: 36px;
+}
+#content nav form .form-input input {
+	flex-grow: 1;
+	padding: 0 16px;
+	height: 100%;
+	border: none;
+	background: var(--grey);
+	border-radius: 36px 0 0 36px;
+	outline: none;
+	width: 100%;
+	color: var(--dark);
+}
+#content nav form .form-input button {
+	width: 36px;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: var(--blue);
+	color: var(--light);
+	font-size: 18px;
+	border: none;
+	outline: none;
+	border-radius: 0 36px 36px 0;
+	cursor: pointer;
+}
+#content nav .notification {
+	font-size: 20px;
+	position: relative;
+}
+#content nav .notification .num {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 2px solid var(--light);
+	background: var(--red);
+	color: var(--light);
+	font-weight: 700;
+	font-size: 12px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#content nav .profile img {
+	width: 36px;
+	height: 36px;
+	object-fit: cover;
+	border-radius: 50%;
+}
+#content nav .switch-mode {
+	display: block;
+	min-width: 50px;
+	height: 25px;
+	border-radius: 25px;
+	background: var(--grey);
+	cursor: pointer;
+	position: relative;
+}
+#content nav .switch-mode::before {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	bottom: 2px;
+	width: calc(25px - 4px);
+	background: var(--blue);
+	border-radius: 50%;
+	transition: all .3s ease;
+}
+#content nav #switch-mode:checked + .switch-mode::before {
+	left: calc(100% - (25px - 4px) - 2px);
+}
+/* NAVBAR */
+
+
+
+
+
+/* MAIN */
+#content main {
+	width: 100%;
+	padding: 36px 24px;
+	font-family: var(--poppins);
+	max-height: calc(100vh - 56px);
+	overflow-y: auto;
+}
+#content main .head-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	grid-gap: 16px;
+	flex-wrap: wrap;
+}
+#content main .head-title .left h1 {
+	font-size: 36px;
+	font-weight: 600;
+	margin-bottom: 10px;
+	color: var(--dark);
+}
+#content main .head-title .left .breadcrumb {
+	display: flex;
+	align-items: center;
+	grid-gap: 16px;
+}
+#content main .head-title .left .breadcrumb li {
+	color: var(--dark);
+}
+#content main .head-title .left .breadcrumb li a {
+	color: var(--dark-grey);
+	pointer-events: none;
+}
+#content main .head-title .left .breadcrumb li a.active {
+	color: var(--blue);
+	pointer-events: unset;
+}
+#content main .head-title .btn-download {
+	height: 36px;
+	padding: 0 16px;
+	border-radius: 36px;
+	background: var(--blue);
+	color: var(--light);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	grid-gap: 10px;
+	font-weight: 500;
+}
+
+
+
+
+#content main .box-info {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	grid-gap: 24px;
+	margin-top: 36px;
+}
+#content main .box-info li {
+	padding: 24px;
+	background: var(--light);
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	grid-gap: 24px;
+}
+#content main .box-info li .bx {
+	width: 80px;
+	height: 80px;
+	border-radius: 10px;
+	font-size: 36px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#content main .box-info li:nth-child(1) .bx {
+	background: var(--light-blue);
+	color: var(--blue);
+}
+#content main .box-info li:nth-child(2) .bx {
+	background: var(--light-yellow);
+	color: var(--yellow);
+}
+#content main .box-info li:nth-child(3) .bx {
+	background: var(--light-orange);
+	color: var(--orange);
+}
+#content main .box-info li .text h3 {
+	font-size: 24px;
+	font-weight: 600;
+	color: var(--dark);
+}
+#content main .box-info li .text p {
+	color: var(--dark);	
+}
+
+
+
+
+
+#content main .table-data {
+	display: flex;
+	flex-wrap: wrap;
+	grid-gap: 24px;
+	margin-top: 24px;
+	width: 100%;
+	color: var(--dark);
+}
+#content main .table-data > div {
+	border-radius: 20px;
+	background: var(--light);
+	padding: 24px;
+	overflow-x: auto;
+}
+#content main .table-data .head {
+	display: flex;
+	align-items: center;
+	grid-gap: 16px;
+	margin-bottom: 24px;
+}
+#content main .table-data .head h3 {
+	margin-right: auto;
+	font-size: 24px;
+	font-weight: 600;
+}
+#content main .table-data .head .bx {
+	cursor: pointer;
+}
+
+#content main .table-data .order {
+	flex-grow: 1;
+	flex-basis: 500px;
+}
+#content main .table-data .order table {
+	width: 100%;
+	border-collapse: collapse;
+}
+#content main .table-data .order table th {
+	padding-bottom: 12px;
+	font-size: 13px;
+	text-align: left;
+	border-bottom: 1px solid var(--grey);
+}
+#content main .table-data .order table td {
+	padding: 16px 0;
+}
+#content main .table-data .order table tr td:first-child {
+	display: flex;
+	align-items: center;
+	grid-gap: 12px;
+	padding-left: 6px;
+}
+#content main .table-data .order table td img {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+#content main .table-data .order table tbody tr:hover {
+	background: var(--grey);
+}
+#content main .table-data .order table tr td .status {
+	font-size: 10px;
+	padding: 6px 16px;
+	color: var(--light);
+	border-radius: 20px;
+	font-weight: 700;
+}
+#content main .table-data .order table tr td .status.completed {
+	background: var(--blue);
+}
+#content main .table-data .order table tr td .status.process {
+	background: var(--yellow);
+}
+#content main .table-data .order table tr td .status.pending {
+	background: var(--orange);
+}
+
+
+#content main .table-data .todo {
+	flex-grow: 1;
+	flex-basis: 300px;
+}
+#content main .table-data .todo .todo-list {
+	width: 100%;
+}
+#content main .table-data .todo .todo-list li {
+	width: 100%;
+	margin-bottom: 16px;
+	background: var(--grey);
+	border-radius: 10px;
+	padding: 14px 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+#content main .table-data .todo .todo-list li .bx {
+	cursor: pointer;
+}
+#content main .table-data .todo .todo-list li.completed {
+	border-left: 10px solid var(--blue);
+}
+#content main .table-data .todo .todo-list li.not-completed {
+	border-left: 10px solid var(--orange);
+}
+#content main .table-data .todo .todo-list li:last-child {
+	margin-bottom: 0;
+}
+/* MAIN */
+/* CONTENT */
+
+
+
+
+
+
+
+
+
+@media screen and (max-width: 768px) {
+	#sidebar {
+		width: 200px;
+	}
+
+	#content {
+		width: calc(100% - 60px);
+		left: 200px;
+	}
+
+	#content nav .nav-link {
+		display: none;
+	}
+}
+
+
+
+
+
+
+@media screen and (max-width: 576px) {
+	#content nav form .form-input input {
+		display: none;
+	}
+
+	#content nav form .form-input button {
+		width: auto;
+		height: auto;
+		background: transparent;
+		border-radius: none;
+		color: var(--dark);
+	}
+
+	#content nav form.show .form-input input {
+		display: block;
+		width: 100%;
+	}
+	#content nav form.show .form-input button {
+		width: 36px;
+		height: 100%;
+		border-radius: 0 36px 36px 0;
+		color: var(--light);
+		background: var(--red);
+	}
+
+	#content nav form.show ~ .notification,
+	#content nav form.show ~ .profile {
+		display: none;
+	}
+
+	#content main .box-info {
+		grid-template-columns: 1fr;
+	}
+
+	#content main .table-data .head {
+		min-width: 420px;
+	}
+	#content main .table-data .order table {
+		min-width: 420px;
+	}
+	#content main .table-data .todo .todo-list {
+		min-width: 420px;
+	}
+}
+</style>
+<script>
+const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+
+allSideMenu.forEach(item=> {
+	const li = item.parentElement;
+
+	item.addEventListener('click', function () {
+		allSideMenu.forEach(i=> {
+			i.parentElement.classList.remove('active');
+		})
+		li.classList.add('active');
+	})
+});
+
+
+
+
+// TOGGLE SIDEBAR
+const menuBar = document.querySelector('#content nav .bx.bx-menu');
+const sidebar = document.getElementById('sidebar');
+
+menuBar.addEventListener('click', function () {
+	sidebar.classList.toggle('hide');
+})
+
+
+
+
+
+
+
+const searchButton = document.querySelector('#content nav form .form-input button');
+const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+const searchForm = document.querySelector('#content nav form');
+
+searchButton.addEventListener('click', function (e) {
+	if(window.innerWidth < 576) {
+		e.preventDefault();
+		searchForm.classList.toggle('show');
+		if(searchForm.classList.contains('show')) {
+			searchButtonIcon.classList.replace('bx-search', 'bx-x');
+		} else {
+			searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		}
+	}
+})
+
+
+
+
+
+if(window.innerWidth < 768) {
+	sidebar.classList.add('hide');
+} else if(window.innerWidth > 576) {
+	searchButtonIcon.classList.replace('bx-x', 'bx-search');
+	searchForm.classList.remove('show');
+}
+
+
+window.addEventListener('resize', function () {
+	if(this.innerWidth > 576) {
+		searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		searchForm.classList.remove('show');
+	}
+})
+
+
+
+const switchMode = document.getElementById('switch-mode');
+
+switchMode.addEventListener('change', function () {
+	if(this.checked) {
+		document.body.classList.add('dark');
+	} else {
+		document.body.classList.remove('dark');
+	}
+});
+
+</script>

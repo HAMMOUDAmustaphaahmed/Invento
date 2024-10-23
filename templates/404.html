@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Non Trouvée</title>
+    <style>
+        /* Style général pour centrer l'image et définir le fond */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Centrer l'image 404 */
+        .centered-content {
+            text-align: center;
+        }
+
+        /* Style pour l'image 404 cliquable */
+        .centered-content img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        /* Effet de zoom au survol de l'image */
+        .centered-content img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="centered-content">
+        <!-- L'image est maintenant un lien cliquable vers la page d'accueil -->
+        <a href="/">
+            <img src="{{ url_for('static', filename='404.gif') }}" alt="Page non trouvée">
+        </a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+from flask_mail import Mail
+
+# Configuration de Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Utilisez le serveur SMTP de votre choix
+app.config['MAIL_PORT'] = 587  # Le port SMTP pour Gmail
+app.config['MAIL_USE_TLS'] = True  # Utiliser TLS pour sécuriser la connexion
+app.config['MAIL_USERNAME'] = 'votre_email@gmail.com'  # Votre adresse e-mail
+app.config['MAIL_PASSWORD'] = 'votre_mot_de_passe'  # Mot de passe de l'e-mail ou de l'application
+app.config['MAIL_DEFAULT_SENDER'] = 'votre_email@gmail.com'  # L'adresse e-mail qui envoie les notifications
+app.config['MAIL_MAX_EMAILS'] = None
+app.config['MAIL_ASCII_ATTACHMENTS'] = False
+
+# Initialisation de Flask-Mail
+mail = Mail(app)
+
+
+
+
+from flask_mail import Message
+
+def send_notification(subject, recipients, body):
+    msg = Message(
+        subject=subject,
+        recipients=recipients,  # Une liste d'e-mails
+        body=body
+    )
+    with app.app_context():
+        mail.send(msg)
+
+
+
+
+
+
+@app.route('/approve_purchase/<int:demande_id>', methods=['POST'])
+def approve_purchase(demande_id):
+    demande = DemandeAchat.query.get(demande_id)
+
+    if demande:
+        # Marquer la demande comme approuvée (mise à jour dans la base de données)
+        demande.etat = 1  # ou une autre valeur indiquant l'approbation
+        db.session.commit()
+
+        # Envoyer un e-mail de notification
+        subject = f"Demande d'achat approuvée : {demande.libelle_article}"
+        recipients = ['destinataire1@example.com', 'destinataire2@example.com']
+        body = f"La demande d'achat pour l'article {demande.libelle_article} a été approuvée.\n" \
+               f"Quantité : {demande.quantite}\n" \
+               f"Demandeur : {demande.demandeur}\n" \
+               f"Date : {demande.date.strftime('%Y-%m-%d')}"
+
+        send_notification(subject, recipients, body)
+
+        return jsonify({'message': 'Demande approuvée et notification envoyée.'}), 200
+    else:
+        return jsonify({'error': 'Demande non trouvée.'}), 404
+
+
+
+
+def send_html_notification(subject, recipients, html_body):
+    msg = Message(
+        subject=subject,
+        recipients=recipients
+    )
+    msg.html = html_body
+    with app.app_context():
+        mail.send(msg)
+
+
+
+html_body = f"""
+    <h2>Demande d'achat approuvée</h2>
+    <p>La demande d'achat pour l'article <strong>{demande.libelle_article}</strong> a été approuvée.</p>
+    <ul>
+        <li><strong>Quantité</strong> : {demande.quantite}</li>
+        <li><strong>Demandeur</strong> : {demande.demandeur}</li>
+        <li><strong>Date</strong> : {demande.date.strftime('%Y-%m-%d')}</li>
+    </ul>
+"""
+send_html_notification(subject, recipients, html_body)
+
+
+
+

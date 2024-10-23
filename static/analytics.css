@@ -1,0 +1,42 @@
+/* analytics.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.kpi-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.kpi-card {
+    background-color: #d4defa;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(37, 37, 37, 0.1);
+    padding: 20px;
+    text-align: center;
+    flex: 1;
+    margin: 10px;
+}
+
+.kpi-card h2 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.kpi-card p {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #009688;
+}
+
+canvas {
+    position: center;
+    max-width: 100%;
+    max-height: 800px;
+   
+}

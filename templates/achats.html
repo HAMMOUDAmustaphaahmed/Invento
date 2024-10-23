@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!-- Favicon -->
+ <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+<!-- Bootstrap CSS -->
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- jQuery (nécessaire pour Bootstrap) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<title>INVENTO</title>
+</head>
+<body>
+
+
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="#" class="brand">
+			<nav>
+                
+                    <img src="{{ url_for('static', filename='invengo.png') }}" alt="Invengo Logo" style="width: 150px;">
+                
+            </nav>
+            <style>
+                nav img {
+                max-width: 150px;  /* Ajustez selon vos besoins */
+                max-height: 150px;
+                margin-top: 20px;
+                margin-bottom: -50px;
+                margin-left: 10px;
+                margin-right: 10px;}
+            </style>
+		</a>
+		<ul class="side-menu top">
+
+		</ul>
+		
+		<ul class="side-menu">
+			
+			<li>
+				<a href="/logout" class="logout">
+					<i class='bx bxs-log-out-circle' ></i>
+					<span class="text" >Logout</span>
+				</a>
+                
+			</li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+			<a href="#" class="nav-link"></a>
+<!-- Search Form -->
+<form id="search-form" action="#" method="POST">
+    <div class="form-input">
+        <input type="search" id="search-query" name="search_query" placeholder="Search..." required>
+        <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+    </div>
+</form>
+
+<!-- Modal -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        
+        <div id="modal-body">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="date-filter-form" method="POST" action="/search_articles">
+                <div class="form-group">
+                    <label for="date-debut">Date de début :</label>
+                    <div class="input-group">
+                        <input type="date" id="date-debut" name="date_debut" class="form-control">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="date-fin">Date de fin :</label>
+                    <div class="input-group">
+                        <input type="date" id="date-fin" name="date_fin" class="form-control">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Appliquer les filtres</button>
+            </form>
+            <table id="results-table" class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Code Article</th>
+                        <th>Libelle</th>
+                        <th>Prix Achat</th>
+                        <th>Quantite</th>
+                        <th>Fournisseur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Les résultats seront insérés ici -->
+                </tbody>
+            </table>
+            <button id="export-csv-btn" class="export-btn">Exporter en CSV</button>
+            <button id="print-btn">Imprimer</button>
+
+
+        </div>
+    </div>
+</div>
+<style>
+    /* Modal */
+.modal {
+    display: none; /* Le modal est masqué par défaut */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #000000;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: rgb(255, 0, 0);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Style spécifique pour le tableau dans le modal */
+.responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+.responsive-table th, .responsive-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+.responsive-table th {
+    background-color: #f2f2f2;
+}
+
+.responsive-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log("Page loaded");
+
+    var modal = document.getElementById("searchModal");
+    var closeBtn = document.querySelector('.close');
+
+    // Ne pas ouvrir automatiquement le modal
+    modal.style.display = "none";
+
+    // Fonction pour gérer la soumission du formulaire de recherche
+    document.getElementById("search-form").onsubmit = function(event) {
+        event.preventDefault();  // Empêche la soumission classique du formulaire
+
+        var searchQuery = document.getElementById("search-query").value;
+        var tableBody = document.querySelector("#results-table tbody");
+
+        // Vérifier que le champ de recherche n'est pas vide
+        if (searchQuery.trim() === "") {
+            console.log("Search query is empty, modal won't open");
+            return; // Ne pas ouvrir le modal si la requête de recherche est vide
+        }
+
+        fetch('/search_articles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'search_query=' + encodeURIComponent(searchQuery),
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableBody.innerHTML = ''; // Efface les résultats précédents
+
+            if (data.articles.length > 0) {
+                data.articles.forEach(article => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td data-label="Code Article">${article.code_article}</td>
+                        <td data-label="Libelle">${article.libelle_article}</td>
+                        <td data-label="Prix Achat">${article.prix_achat}</td>
+                        <td data-label="Quantite">${article.quantite}</td>
+                        <td data-label="Fournisseur">${article.fournisseur}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5">No articles found</td></tr>';
+            }
+
+            // Afficher le modal une fois les résultats obtenus
+            modal.style.display = "block";
+        });
+    };
+
+    // Fermer le modal quand on clique sur le bouton de fermeture
+    closeBtn.onclick = function() {
+        console.log("Modal closed");
+        modal.style.display = "none";
+    };
+
+    // Fermer le modal si on clique en dehors de celui-ci
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    // Fonction pour exporter les résultats du tableau en fichier CSV
+    document.getElementById("export-csv-btn").onclick = function() {
+    var table = document.getElementById("results-table");
+    var rows = Array.from(table.querySelectorAll('tr'));
+
+    // Créer une feuille de calcul
+    var workbook = XLSX.utils.book_new();
+    var worksheet_data = [];
+
+    // Extraire les en-têtes du tableau (th)
+    var headers = Array.from(rows[0].querySelectorAll('th')).map(header => header.textContent.trim());
+    worksheet_data.push(headers); // Ajouter les en-têtes comme première ligne
+
+    // Extraire les données du tableau (td)
+    rows.slice(1).forEach(row => {
+        var rowData = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+        worksheet_data.push(rowData); // Ajouter les données de chaque ligne
+    });
+
+    // Créer une feuille dans le workbook avec les données du tableau
+    var worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Articles");
+
+    // Exporter le fichier Excel
+    XLSX.writeFile(workbook, 'resultats_recherche_articles.xlsx');
+};
+    // Fonction pour imprimer le tableau
+    document.getElementById("print-btn").onclick = function() {
+        var table = document.getElementById("results-table").outerHTML;
+
+        // Ouvrir une nouvelle fenêtre pour l'impression
+        var printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Imprimer les résultats</title>');
+        printWindow.document.write('<style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 8px; text-align: left; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(table); // Insérer le tableau dans la nouvelle fenêtre
+        printWindow.document.write('</body></html>');
+        printWindow.document.close(); // Fermer le document pour qu'il soit prêt à être imprimé
+        printWindow.focus();
+        printWindow.print(); // Ouvrir la boîte de dialogue d'impression
+        printWindow.close(); // Fermer la fenêtre d'impression après l'impression
+    };
+    // Fermer le modal si on clique en dehors de celui-ci
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+});
+
+</script>
+
+
+
+
+
+
+
+			
+			<input type="checkbox" id="switch-mode" hidden>
+			<label for="switch-mode" class="switch-mode"></label>
+			
+            <a href="#" class="notification">
+				<i class='bx bxs-message' ></i>
+				<span class="num">1</span>
+			</a>
+			
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					
+					<ul class="breadcrumb">
+						<li>
+							<a href="#" >Service Achats et Ventes</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						
+					</ul>
+				</div>
+				
+			</div>
+
+			<ul class="box-info">
+				<li  id="orders-list-item" style="cursor: pointer;background-color: #c3e3f0;">
+                    <i class='bx bxs-bookmark-plus'></i>
+                    <span class="text">
+                        <h3 class="orders-count">{{ orders_count }}</h3>  <!-- Display the count here --> 
+                        <p>Demandes d'Achats</p>
+                    </span>
+                </li>
+                <!-- Modal structure -->
+<div id="ordersModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Demandes d'Achats</h2>
+        <table id="orders-table">
+            <thead>
+                <tr>
+                    <th>Code Demande</th>
+                    <th>Code Article</th>
+                    <th>Libelle Article</th>
+                    <th>Quantité</th>
+                    <th>Emplacement</th>
+                    <th>Date</th>
+                    <th>Demandeur</th>
+                </tr>
+            </thead>
+            <tbody id="orders-body">
+                <!-- Orders will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+                
+
+
+
+
+
+<li id="total-sales-item" style="cursor: pointer;background-color: #b2db96;">
+    <i class='bx bxs-bookmark-minus'></i>
+    <span class="text">
+        <h3 id="total-sales-amount"class="sales-count">{{ sales_count }}</h3>
+        <p>Demandes de Ventes</p>
+
+    </span>
+</li>
+
+<!-- Modal structure for sales -->
+<div id="salesModal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Demandes de Ventes</h2>
+        <table id="sales-table">
+            <thead>
+                <tr>
+                    
+                    <th>Code Article</th>
+                    <th>Libelle Article</th>
+                    <th>Quantité</th>
+                    <th>Emplacement</th>
+                    <th>Date</th>
+                    <th>Demandeur</th>
+                </tr>
+            </thead>
+            <tbody id="sales-body">
+                <!-- Sales will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+</style>
+
+
+			
+<li id="pending-arrivals-item" style="cursor: pointer;background-color: #c598a0;">
+    <i class='bx bxs-archive-in'></i>
+    <span class="text">
+        <h3 id="total-arrivals-amount" class="arrivals-count">{{count_ventes_attente_arrive}}</h3>
+        <p>Articles en attente d'arrivée</p>
+    </span>
+</li>
+
+<li id="pending-shipments-item" style="cursor: pointer;background-color: #edf7b6;">
+    <i class='bx bxs-archive-out'></i>
+    <span class="text">
+        <h3 id="total-shipments-amount" class="shipments-count">{{count_ventes_attente_expedition}}</h3>
+        <p>Ventes en attente d'expédition</p>
+    </span>
+</li>
+
+                <!-- Pending Arrivals Modal -->
+
+    
+
+    
+
+<!-- Styles -->
+
+
+<!-- Scripts for Modals -->
+
+
+			</ul>
+			</ul>
+
+            
+
+  
+<div class="table-data" >
+    <h2>Demandes d'Achats en Cours</h2>
+    <table class="table table-striped" style="background-color: #ccd2ee;text-align:center;">
+        <thead>
+            <tr>
+                <th>Code Demande</th>
+                <th>Code Article</th>
+                <th>Libelle</th>
+                <th>Quantité</th>
+                <th>Demandeur</th>
+                <th>Emplacement</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demande in demandes_achats %}
+            <tr>
+                <td>{{ demande.code_demande }}</td>
+                <td>{{ demande.code_article }}</td>
+                <td>{{ demande.libelle_article }}</td>
+                <td>{{ demande.quantite }}</td>
+                <td>{{ demande.demandeur }}</td>
+                <td>{{ demande.emplacement }}</td>
+                <td>{{ demande.date }}</td>
+                <td>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#modalAchat{{ demande.code_demande }}">
+                        Approuver
+                    </button>
+                    <style>
+                        .modal {
+                            z-index: 1050;
+                        }
+                        .modal-backdrop {
+                            z-index: 1040;
+                        }
+                    </style>
+                    <!-- Modal pour approuver la demande -->
+                    <div class="modal fade" id="modalAchat{{ demande.code_demande }}" tabindex="-1" aria-labelledby="modalAchatLabel{{ demande.code_demande }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalAchatLabel{{ demande.code_demande }}">Approuver la Demande d'Achat</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form method="POST" action="{{ url_for('service_achat_vente') }}">
+                                    <input type="hidden" name="demande_id" value="{{ demande.code_demande }}">
+                                    <input type="hidden" name="type_demande" value="achat">
+                                    <input type="hidden" name="action" value="approuver">
+                                    
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="fournisseur{{ demande.code_demande }}">Fournisseur</label>
+                                            <input type="text" class="form-control" id="fournisseur{{ demande.code_demande }}" name="fournisseur" list="fournisseurs{{ demande.code_demande }}" required>
+                                            <datalist id="fournisseurs{{ demande.code_demande }}"></datalist>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="prix_achat">Prix d'Achat</label>
+                                            <input type="number" step="0.1" class="form-control" name="prix_achat" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-success">Approuver</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+ 
+    
+
+<script>
+document.querySelectorAll('[id^="fournisseur"]').forEach(input => {
+    input.addEventListener('input', function() {
+        var inputValue = this.value;
+        var demandeId = this.id.replace('fournisseur', ''); // Extraire l'ID de la demande pour lier au datalist correct
+        var dataList = document.getElementById('fournisseurs' + demandeId);
+
+        if (inputValue.length > 0) {
+            fetch('/search_fournisseur', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'fournisseur=' + encodeURIComponent(inputValue)
+            })
+            .then(response => response.json())
+            .then(data => {
+                dataList.innerHTML = ''; // Vider la liste actuelle
+                data.forEach(fournisseur => {
+                    var option = document.createElement('option');
+                    option.value = fournisseur.nom_fournisseur;
+                    dataList.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching fournisseurs:', error));
+        } else {
+            dataList.innerHTML = ''; // Vider la liste si l'utilisateur efface l'input
+        }
+    });
+});
+
+</script>
+
+
+
+
+    <h2>Demandes de Ventes en Cours</h2>
+<table class="table table-striped" style="background-color: #eedabb;text-align:center;">
+    <thead>
+        <tr>
+            <th>Article</th>
+            <th>Quantité</th>
+            <th>Demandeur</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for demande in demandes_ventes %}
+        <tr>
+            <td>{{ demande.libelle_article }}</td>
+            <td>{{ demande.quantite }}</td>
+            <td>{{ demande.demandeur }}</td>
+            <td>{{ demande.date.strftime('%Y-%m-%d %H:%M:%S') if demande.date else 'En attente' }}</td>
+            <td>
+                <!-- Bouton Approuver la demande -->
+                <form method="POST" action="{{ url_for('service_achat_vente') }}">
+                    <input type="hidden" name="demande_id" value="{{ demande.code_demande }}">
+                    <input type="hidden" name="type_demande" value="vente">
+                    
+                    <!-- Button pour approuver la demande de vente -->
+                    <button type="submit" name="button-approuver-demande-vente" value="approuver" class="btn btn-success">
+                        Approuver la demande
+                    </button>
+                    
+                    <!-- Button pour annuler la demande de vente -->
+                    <button type="submit" name="button-annuler-demande-vente" value="annuler" class="btn btn-danger">
+                        Annuler la demande
+                    </button>
+                </form>
+                
+                <script>
+                    $(document).ready(function() {
+                        var actionValue = '';  // Variable pour stocker la valeur du bouton cliqué
+                        
+                        // Capture le clic sur le bouton pour approuver la demande de vente
+                        $('button[name="button-approuver-demande-vente"]').on('click', function() {
+                            actionValue = $(this).val();  // Récupère la valeur 'approuver'
+                        });
+                    
+                        // Capture le clic sur le bouton pour annuler la demande de vente
+                        $('button[name="button-annuler-demande-vente"]').on('click', function() {
+                            actionValue = $(this).val();  // Récupère la valeur 'annuler'
+                        });
+                    
+                        // Écouteur pour la soumission du formulaire
+                        $('form').on('submit', function(e) {
+                            var demandeId = $(this).find('input[name="demande_id"]').val();
+                            console.log("Demande ID: " + demandeId);
+                            console.log("Action: " + actionValue);  // Utilisation de la valeur du bouton cliqué
+                    
+                            // Injecte la valeur de l'action cliquée dans un champ caché si nécessaire
+                            $(this).append('<input type="hidden" name="action" value="' + actionValue + '">');
+                        });
+                    });
+                    </script>
+                    
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+        $('form').on('submit', function(e) {
+            // Récupération des valeurs des champs pour déboguer
+            var demandeId = $(this).find('input[name="demande_id"]').val();
+            var action = $(this).find('button[name="action"]').val(); // Récupérer la valeur de l'action
+    
+            // Affichage dans la console pour vérification
+            console.log("Demande ID: " + demandeId);
+            console.log("Action: " + action);
+        });
+    });
+    </script>
+    
+
+        
+    </div>
+        
+    </div>
+
+
+
+	
+		
+
+			</div>
+		</main>
+		<!-- MAIN -->
+	</section>
+	<!-- CONTENT -->
+	
+
+	<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+<style>
+</style>
+<script>
+    $(document).ready(function() {
+        $('form').on('submit', function(e) {
+            e.preventDefault();  // Empêche la soumission par défaut pour le test
+    
+            // Récupération des valeurs des champs pour déboguer
+            var fournisseur = $(this).find('input[name="fournisseur"]').val();
+            var prixAchat = $(this).find('input[name="prix_achat"]').val();
+            var demandeId = $(this).find('input[name="demande_id"]').val();
+            
+            // Affichage dans la console pour vérification
+            console.log("Fournisseur: " + fournisseur);
+            console.log("Prix d'achat: " + prixAchat);
+            console.log("Demande ID: " + demandeId);
+    
+            // Si tout est bon, décommenter la ligne suivante pour soumettre le formulaire
+            this.submit();
+        });
+    });
+    </script>
+    
